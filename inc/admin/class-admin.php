@@ -266,7 +266,8 @@ class Admin {
 				return array($file, __('Unknown type: ' . $type, $this->plugin_text_domain));
 		}
 	
-		if(get_option($this->plugin_name .'_preserve_exif_datas' && $command == 'opt-jpg') == TRUE) $command .= ' -m all';
+		if(get_option($this->plugin_name .'_preserve_exif_datas' == TRUE && $command == 'opt-jpg')) $command .= ' -m all';
+		stream_set_blocking(STDIN, false);
 		$result = exec($command . ' ' . escapeshellarg($file));
 
 		$result = str_replace($file . ': ', '', $result);
