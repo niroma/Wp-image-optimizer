@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       WP Image Optimizer
  * Plugin URI:        https://wordpress.org/plugins/wp-image-optimizer/
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       Reduce image file sizes and improve website performance using Linux littleutils image optimizers within WordPress.
  * Version:           1.0.0
  * Author:            Niroma
  * Author URI:        https://www.niroma.net/

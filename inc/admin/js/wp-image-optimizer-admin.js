@@ -73,26 +73,56 @@
 	 */
 
 	var totalItems = 0,
+	 	totalNonOptiItems = 0,
+		totalItemsToProcess = 0,
 		toProcess = 0,
-		errorCount = 0;
+		errorCount = 0,
+		awaitingOpti;
 	
 	function getList(ajxaction) {
 		$('#bulkOptimizeOutputProgressPercent').html("<p><b>Retrieving files list - Please wait</b></p>");
-		var call = $.ajax({
-			url: ajaxurl,
-			data: {action: ajxaction},
-			type: 'get',
-		});
-		
-		call.done(function(fileids) {
-			processList(fileids);
-		});
+			/*var call = $.ajax({
+				url: ajaxurl,
+				data: {action: ajxaction},
+				type: 'get',
+			});
+			
+			call.done(function(fileids) {
+				processList(fileids);
+			});*/
+			var fileids;
+			
+			var j1 = $.ajax({ // First Request
+				url: ajaxurl,
+				data: {action: 'get_all_files_list'},
+				type: 'get',
+				success: function(data) {
+					totalItems = data.length;
+					if (ajxaction == 'get_all_files_list') fileids = data;
+				}      
+			}); 
+			
+			var j2 = $.ajax({ //Seconds Request
+				url: ajaxurl,
+				data: {action: 'get_nonopti_files_list'},
+				type: 'get',
+				success: function(data) {
+					totalNonOptiItems = data.length;
+					awaitingOpti = data;
+					if (ajxaction == 'get_nonopti_files_list') fileids = data;
+				}  
+			}); 
+			
+			$.when(j1, j2).then(function() {
+				processList(fileids);
+			});
+
 	}
 	
 	function processList(idslist) {
 		if (idslist) {
-			toProcess = totalItems = idslist.length;
-			$('#bulkOptimizeOutputProgressPercent').html( totalItems +" files found - Please wait");
+			toProcess = totalItemsToProcess = idslist.length;
+			$('#bulkOptimizeOutputProgressPercent').html( totalItemsToProcess +" files in queue - Please wait");
 				for (var i in idslist) {
 					/*** PROCESS SINGLE FILE ***/
 						$.ajaxQueue({
@@ -103,32 +133,53 @@
 							console.log(oData); 
 							toProcess--;
 							setCounter(oData);
+							setCircleProgress(oData);
 						}).fail(function(oData) { 
 							console.log(oData); 
 							toProcess--;
 							errorCount++;
 							setCounter(null);
+							setCircleProgress(idslist[i], oData);
 						});
 					/*** PROCESS SINGLE FILE ***/	
-					//$('#bulkOptimizeOutputProgressPercent').html('Optimization Completed');
-					//$('#bulkOptimizeOutputProgress > span').css('width', '100%');
 				}
 		} else console.log('no data');
 	}
 	
 	function setCounter(datas) {
-		var fileCount = totalItems - toProcess;
+		var fileCount = totalItemsToProcess - toProcess;
 		if (fileCount == toProcess) {
 			$('#bulkOptimizeOutputNotice').html('Optimization completed');
 			$('#bulkOptimizeOutputProgressPercent').html('100%');
 			$('#bulkOptimizeOutputProgress > span').css('width', '100%');
 		} else {
-			var message = 'An error occured while processing file '+ fileCount +' of '+ totalItems;
-			if (datas) message = 'File '+ fileCount +' of '+ totalItems +' successfully optimized : '+ datas['image_optimizer'];
+			var message = 'An error occured while processing file '+ fileCount +' of '+ totalItemsToProcess;
+			if (datas) message = 'File '+ fileCount +' of '+ totalItemsToProcess +' successfully optimized : '+ datas['image_optimizer'];
 			$('#bulkOptimizeOutputNotice').html(message);
-			var percentProgress = (fileCount / totalItems * 100).toFixed(2);
+			var percentProgress = (fileCount / totalItemsToProcess * 100).toFixed(2);
 			$('#bulkOptimizeOutputProgressPercent').html(percentProgress + '%');
 			$('#bulkOptimizeOutputProgress > span').css('width', percentProgress + '%');
+			if ( percentProgress == 100.00) {
+				$('#bulkOptimizeOutputProgressPercent').html('Optimization completed');
+				$('#bulkOptimizeOutputNotice').html('<b>Congratulations, all your files have been optimized</b>');
+				$('#bulkOptimizeWarning').remove();
+			}
+		}
+	}
+	
+	function setCircleProgress(datas) {
+		var idFile = datas['id'],
+			idx = $.inArray(idFile, awaitingOpti);
+		if (idx != -1) {
+			awaitingOpti.splice(idx, 1);
+			totalNonOptiItems--;
+			var totalOptiItems = totalItems - totalNonOptiItems,
+				optimizedPercent = totalOptiItems / totalItems * 100;
+			
+			$('#percentCircle').attr('class', 'c100 p'+ optimizedPercent.toFixed() +' big');
+			$('#percentCircleValue').html( optimizedPercent.toFixed(2) +'%');
+			$('#wpio-nonopti').html(totalNonOptiItems);
+			if ( optimizedPercent.toFixed(2) == 100.00) $('#wpio-nonopti-row').remove();
 		}
 	}
 	/*
@@ -164,12 +215,12 @@
 	}
 	*/
 	$('#bulkOptimizeAllFiles').on( "click", function() {
-		$('#bulkOptimizeButtons').hide();
+		$('#bulkOptimizeButtons').remove();
 		$('#bulkOptimize').show();
 		getList('get_all_files_list');
 	});
 	$('#bulkOptimizeFiles').on( "click", function() {
-		$('#bulkOptimizeButtons').hide();
+		$('#bulkOptimizeButtons').remove();
 		$('#bulkOptimize').show();
 		getList('get_nonopti_files_list');
 	});

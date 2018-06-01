@@ -139,7 +139,8 @@ class Admin {
 	public function image_optimizer_file_optimizer() {
 		$attachmentId = $_POST['file'];
 		$meta = $this->image_optimizer_resize_from_meta_data( wp_get_attachment_metadata( $attachmentId, true ), $attachmentId );
-		wp_update_attachment_metadata( $attachmentId, $meta );		
+		wp_update_attachment_metadata( $attachmentId, $meta );	
+		$meta['id'] = $attachmentId;
 		wp_send_json($meta);
 	}
 	
@@ -222,14 +223,12 @@ class Admin {
 		// check that the file exists
 		if ( FALSE === file_exists($file_path) || FALSE === is_file($file_path) ) {
 			$msg = sprintf(__("Could not find <span class='code'>%s</span>", $this->plugin_text_domain), $file_path);
-			$debug .= 'file not exists ';
 			return array($file, $msg);
 		}
 	
 		// check that the file is writable
 		if ( FALSE === is_writable($file_path) ) {
 			$msg = sprintf(__("<span class='code'>%s</span> is not writable", $this->plugin_text_domain), $file_path);
-			$debug .= 'file is not writable ';
 			return array($file, $msg);
 		}
 	
@@ -239,13 +238,11 @@ class Admin {
 		$wp_upload_url = $upload_dir['baseurl'];
 		if ( 0 !== stripos(realpath($file_path), realpath($wp_upload_dir)) ) {
 			$msg = sprintf(__("<span class='code'>%s</span> must be within the content directory (<span class='code'>%s</span>)", $this->plugin_text_domain), htmlentities($file_path), $wp_upload_dir);
-			$debug .= 'folder issue ';
 			return array($file, $msg);
 		}
 		
 		if(function_exists('getimagesize')){
 			$type = getimagesize($file_path);
-			$debug .= 'GET IMAGE SIZE IS WORKING ';
 			if(false !== $type){
 				$type = $type['mime'];
 			}
@@ -258,24 +255,20 @@ class Admin {
 		switch($type){
 			case 'image/jpeg':
 				$command = 'opt-jpg';
-				$debug .= 'JPG DETECTED ';
 				break;
 			case 'image/png':
 				$command = 'opt-png';
-				$debug .= 'PNG DETECTED ';
 				break;
 			case 'image/gif':
 				$command = 'opt-gif';
-				$debug .= 'GIF DETECTED ';
 				break;
 			default:
 				return array($file, __('Unknown type: ' . $type, $this->plugin_text_domain));
 		}
 	
-		$debug .= 'TRYING EXEC ';
+		if(get_option($this->plugin_name .'_preserve_exif_datas' && $command == 'opt-jpg') == TRUE) $command .= ' -m all';
 		$result = exec($command . ' ' . escapeshellarg($file));
-	
-		$debug .= 'RESULT : '. $result;
+
 		$result = str_replace($file . ': ', '', $result);
 	
 		if ($result == 'unchanged') {
@@ -307,11 +300,11 @@ class Admin {
 	 *
 	 * Called after `wp_generate_attachment_metadata` is completed.
 	 */
-	public function image_optimizer_resize_from_meta_data($meta, $ID) {
+	public function image_optimizer_resize_from_meta_data($meta, $ID = NULL) {
 		if ( !empty($ID) && empty($meta) || empty($meta['file']) || empty($meta['sizes']) ) {
 			$meta = $this->cw_fix_meta($meta, $ID);
 		}
-		$image_optimizer_meta = $meta['image_optimizer'];
+		$image_optimizer_meta = !empty($meta['image_optimizer']) ? $meta['image_optimizer'] : '';
 		$file_path = $meta['file'];
 		$store_absolute_path = true;
 		$upload_dir = wp_upload_dir();
@@ -347,7 +340,7 @@ class Admin {
 			$meta['sizes'][$size]['image_optimizer'] = $results;
 		}
 		
-		$this->set_attachment_attributes( $ID, $meta );
+		if (!empty($ID)) $this->set_attachment_attributes( $ID, $meta );
 		if ($image_optimizer_meta != $meta['image_optimizer']) update_post_meta( $ID, 'image_optimizer', $meta['image_optimizer'] );
 		
 		return $meta;
@@ -545,6 +538,7 @@ class Admin {
 				$admin_notice = '';
 				$messageLog = '';
 				$skip_check = $_POST[$this->plugin_name.'_skip_check'];
+				$preserve_exif =  $_POST[$this->plugin_name.'_preserve_exif_datas']; 
 				
 				if (empty($admin_notice)) {
 					if ( get_option( $this->plugin_name.'_skip_check' ) !== false ) {
@@ -552,10 +546,16 @@ class Admin {
 					} else {
 						add_option( $this->plugin_name.'_skip_check', $skip_check);
 					}
+					
+					if ( get_option( $this->plugin_name.'_preserve_exif_datas' ) !== false ) {
+						update_option( $this->plugin_name.'_preserve_exif_datas', $preserve_exif );
+					} else {
+						add_option( $this->plugin_name.'_preserve_exif_datas', $preserve_exif);
+					}
+					
 					$admin_notice = "success";
 					$messageLog .= 'Settings saved';
 				}
-				
 				
 				$this->custom_redirect( $admin_notice, $messageLog);
 				die();

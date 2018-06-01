@@ -36,6 +36,7 @@ The WP Image Optimizer plugin is based on the WP Smush.it plugin. Unlike the WP 
 1. Install littleutils on your Linux server (step-by-step instructions are below).
 1. Upload the 'wp-image-optimizer' plugin to your '/wp-content/plugins/' directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
+1. Navigate to the settings page (Media >> WP Image Optimizer) to optimize your files
 1. Done!
 
 = Installing littleutils: Ubuntu 11.04 (32-bit) =
@@ -65,7 +66,7 @@ These instructions were tested with littleutils 1.0.27 and CentOS 6.0 (32-bit, "
 
 **littleutils is installed, but the plugin says it isn't.** If you are confident that it is installed properly, then go to the plugin configuration page and disable the installation check.
 
-It is also possible that your binaries aren't accessible to your web server user. You can link these binaries using the following commands:
+It is also possible that your binaries aren't accessible to your web server user (especially while using a cron task or wp-cli to create posts). You can link these binaries using the following commands:
     ln -s /usr/local/bin/opt-jpg /usr/bin/opt-jpg
     ln -s /usr/local/bin/opt-png /usr/bin/opt-png
     ln -s /usr/local/bin/opt-gif /usr/bin/opt-gif
