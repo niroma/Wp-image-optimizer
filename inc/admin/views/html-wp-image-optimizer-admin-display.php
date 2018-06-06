@@ -23,11 +23,50 @@
 		}
     ?>
     <div id="col-container">
-    	<?php 	/*global $wpdb;	
+    	<?php 	
+		/*
+		global $wpdb;
 		
-		/*$attachments = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )  WHERE ({$wpdb->posts}.post_mime_type LIKE 'image%' AND  {$wpdb->posts}.post_type = 'attachment') AND ({$wpdb->postmeta}.meta_key = 'is_optimized' AND CAST({$wpdb->postmeta}.meta_value AS CHAR) NOT IN ('1')) OR {$wpdb->postmeta}.meta_key != 'is_optimized';"); */
-		/*$attachments = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id ) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND  {$wpdb->posts}.post_type = 'attachment' AND ( {$wpdb->postmeta}.meta_key != 'is_optimized' OR ({$wpdb->postmeta}.meta_key = 'is_optimized' AND CAST({$wpdb->postmeta}.meta_value AS CHAR) NOT IN ('1')));"); 
-		var_dump($attachments);*/
+		$countattachments = $this->get_files_sum();
+		$all = array();
+		if ($countattachments > 5000) {
+			$last_id = 0;
+			do {
+				$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment' AND ID > %d LIMIT 5000;", $last_id ));
+				foreach($attachments as $attachment) {
+					$all[] = $attachment->ID;
+					$last_id = $attachment->ID;
+				}
+			} while ( ! empty( $attachments ) );
+		} else {
+			$attachments = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment';" ); 
+			foreach($attachments as $attachment)  $all[] = $attachment->ID;
+		}
+		
+		$countoptimized = $this->get_optimized_files_sum();
+		$optimized = array();
+		if ($countoptimized > 5000) {
+			$last_id = 0;
+			do {
+				$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1' AND ID > %d LIMIT 5000;", $last_id ));
+				foreach($attachments as $attachment) {
+					$optimized[] = $attachment->ID;
+					$last_id = $attachment->ID;
+				}
+			} while ( ! empty( $attachments ) );
+		} else {
+			$attachments = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )  WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND  {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1';" ); 
+			foreach($attachments as $attachment)  $optimized[] = $attachment->ID;
+		}
+
+		$nonoptimized = array();
+		foreach ($all as $one) if( !in_array( $one ,$optimized ) ) $nonoptimized[] = $one;
+		$dataset = array(
+			"all" => $all,
+			"nonopti" => $nonoptimized
+		);
+		var_dump($dataset);
+		*/
 		?>
         
         <div id="col-left">

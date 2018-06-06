@@ -30,6 +30,7 @@ The WP Image Optimizer plugin is based on the WP Smush.it plugin. Unlike the WP 
 1. **Faster backups.** Smaller image sizes also means faster backups.
 1. **Less bandwidth usage.** Optimizing your images can save you hundreds of KB per image, which means significantly less bandwidth usage.
 1. **Super fast.** Because it runs on your own server, you don’t have to wait for a third party service to receive, process, and return your images. You can optimize hundreds of images in just a few minutes.
+1. **Robust** I needed a bulletproof plugin, able to handle thousands of files and working using cron-task with wp-cli. Most of the optimization plugins I had been testing failed, so I decided to build a new version of cw image otpimizer to suit my neeeds.
 
 == Installation ==
 

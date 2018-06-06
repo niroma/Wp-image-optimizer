@@ -77,7 +77,7 @@
 		totalItemsToProcess = 0,
 		toProcess = 0,
 		errorCount = 0,
-		awaitingOpti;
+		awaitingOpti, allfiles;
 	
 	function getList(ajxaction) {
 		$('#bulkOptimizeOutputProgressPercent').html("<p><b>Retrieving files list - Please wait</b></p>");
@@ -92,6 +92,21 @@
 			});*/
 			var fileids;
 			
+			$.ajax({
+				url: ajaxurl,
+				data: {action: 'get_full_files_list'},
+				type: 'get'
+			}).done( function( data ) {
+				console.log(data);
+				if (data.all) allfiles = data.all;
+				if (data.nonopti) awaitingOpti = data.nonopti;
+				totalItems = allfiles.length;
+				totalNonOptiItems = awaitingOpti.length;
+				if (ajxaction == 'get_nonopti_files_list') fileids = awaitingOpti;
+				if (ajxaction == 'get_all_files_list') fileids = allfiles;
+				processList(fileids);
+			});
+			/*
 			var j1 = $.ajax( {
 						url: ajaxurl,
 						data: {action: 'get_all_files_list'},
@@ -111,7 +126,7 @@
 					if (ajxaction == 'get_all_files_list') fileids = data;
 				}      
 			}); */
-			
+			/*
 			var j2 = $.ajax( {
 						url: ajaxurl,
 						data: {action: 'get_nonopti_files_list'},
@@ -123,6 +138,7 @@
 						awaitingOpti = data;
 						if (ajxaction == 'get_nonopti_files_list') fileids = data;
 					});
+					*/
 				 /*$.ajax({ //Seconds Request
 				url: ajaxurl,
 				data: {action: 'get_nonopti_files_list'},
@@ -133,11 +149,11 @@
 					if (ajxaction == 'get_nonopti_files_list') fileids = data;
 				}  
 			}); */
-			
+			/*
 			$.when(j1, j2).then(function() {
 				console.log(fileids);
 				processList(fileids);
-			});
+			});*/
 
 	}
 	
