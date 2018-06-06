@@ -23,6 +23,13 @@
 		}
     ?>
     <div id="col-container">
+    	<?php 	/*global $wpdb;	
+		
+		/*$attachments = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )  WHERE ({$wpdb->posts}.post_mime_type LIKE 'image%' AND  {$wpdb->posts}.post_type = 'attachment') AND ({$wpdb->postmeta}.meta_key = 'is_optimized' AND CAST({$wpdb->postmeta}.meta_value AS CHAR) NOT IN ('1')) OR {$wpdb->postmeta}.meta_key != 'is_optimized';"); */
+		/*$attachments = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id ) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND  {$wpdb->posts}.post_type = 'attachment' AND ( {$wpdb->postmeta}.meta_key != 'is_optimized' OR ({$wpdb->postmeta}.meta_key = 'is_optimized' AND CAST({$wpdb->postmeta}.meta_value AS CHAR) NOT IN ('1')));"); 
+		var_dump($attachments);*/
+		?>
+        
         <div id="col-left">
             <div class="col-wrap">
                 <div class="card">
@@ -140,4 +147,5 @@
     	<div class="clear"></div>
     </div>
 </div>
+<?php //phpinfo(); ?>
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->

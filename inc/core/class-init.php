@@ -3,7 +3,7 @@
 namespace WP_Image_Optimizer\Inc\Core;
 use WP_Image_Optimizer as NS;
 use WP_Image_Optimizer\Inc\Admin as Admin;
-use WP_Image_Optimizer\Inc\Frontend as Frontend;
+//use WP_Image_Optimizer\Inc\Frontend as Frontend;
 
 /**
  * The core plugin class.
@@ -71,7 +71,7 @@ class Init {
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
-		$this->define_public_hooks();
+		//$this->define_public_hooks();
 	}
 
 	/**
@@ -160,8 +160,10 @@ class Init {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_admin_menu' );
 
-
 		$this->loader->add_filter('wp_generate_attachment_metadata', $plugin_admin, 'image_optimizer_resize_from_meta_data', 10, 2);
+		// TEST
+		//$this->loader->add_filter('wp_insert_post', $plugin_admin, 'optimize_post_images', 10, 3);
+
 		$this->loader->add_filter('manage_media_columns', $plugin_admin, 'image_optimizer_columns');
 		$this->loader->add_filter( 'attachment_fields_to_edit', $plugin_admin, 'add_media_attachment_field_edit', 10, 2);
 		
@@ -201,6 +203,7 @@ class Init {
 	 *
 	 * @access    private
 	 */
+	/*
 	private function define_public_hooks() {
 
 		$plugin_public = new Frontend\Frontend( $this->get_plugin_name(), $this->get_version(), $this->get_plugin_text_domain() );
@@ -209,7 +212,7 @@ class Init {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
 	}
-
+	*/
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
 	 */

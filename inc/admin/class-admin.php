@@ -114,7 +114,7 @@ class Admin {
 		 */
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-image-optimizer-admin.js', array( 'jquery' ), $this->version, false );
-		wp_localize_script('cw-image-optimizer-ajax', 'ajaxurl', admin_url( 'admin-ajax.php' ));
+		wp_localize_script('wp-image-optimizer-ajax', 'ajaxurl', admin_url( 'admin-ajax.php' ));
 
 	}
 	public function display_plugin_setup_page() {
@@ -198,6 +198,7 @@ class Admin {
 		wp_redirect($sendback);
 		exit(0);
 	}
+	
 	/**
 	 * Process an image.
 	 *
@@ -225,7 +226,9 @@ class Admin {
 			$msg = sprintf(__("Could not find <span class='code'>%s</span>", $this->plugin_text_domain), $file_path);
 			return array($file, $msg);
 		}
-	
+		
+		chmod($file,0755);
+		
 		// check that the file is writable
 		if ( FALSE === is_writable($file_path) ) {
 			$msg = sprintf(__("<span class='code'>%s</span> is not writable", $this->plugin_text_domain), $file_path);
@@ -267,7 +270,7 @@ class Admin {
 		}
 	
 		if(get_option($this->plugin_name .'_preserve_exif_datas' == TRUE && $command == 'opt-jpg')) $command .= ' -m all';
-		stream_set_blocking(STDIN, false);
+
 		$result = exec($command . ' ' . escapeshellarg($file));
 
 		$result = str_replace($file . ': ', '', $result);
@@ -303,7 +306,7 @@ class Admin {
 	 */
 	public function image_optimizer_resize_from_meta_data($meta, $ID = NULL) {
 		if ( !empty($ID) && empty($meta) || empty($meta['file']) || empty($meta['sizes']) ) {
-			$meta = $this->cw_fix_meta($meta, $ID);
+			$meta = $this->wpio_fix_meta($meta, $ID);
 		}
 		$image_optimizer_meta = !empty($meta['image_optimizer']) ? $meta['image_optimizer'] : '';
 		$file_path = $meta['file'];
@@ -336,7 +339,6 @@ class Admin {
 	
 		foreach($meta['sizes'] as $size => $data) {
 			list($optimized_file, $results) = $this->image_optimizer($base_dir . $data['file']);
-	
 			$meta['sizes'][$size]['file'] = str_replace($base_dir, '', $optimized_file);
 			$meta['sizes'][$size]['image_optimizer'] = $results;
 		}
@@ -347,12 +349,11 @@ class Admin {
 		return $meta;
 	}
 
-	public function cw_fix_meta($meta, $id) {
+	public function wpio_fix_meta($meta, $id) {
 		$file = get_attached_file($id);
 		$newmeta = wp_generate_attachment_metadata( $id, $file );
 		wp_update_attachment_metadata( $id, $newmeta );
 		$meta = wp_get_attachment_metadata($id);
-	
 		return $meta;
 	}	
 	/**
@@ -437,7 +438,7 @@ class Admin {
 	 * the `manage_media_columns` hook.
 	 */
 	public function image_optimizer_columns($defaults) {
-		$defaults['cw-image-optimizer'] = 'Image Optimizer';
+		$defaults['wp-image-optimizer'] = 'Image Optimizer';
 		return $defaults;
 	}
 	
@@ -458,7 +459,7 @@ class Admin {
 	 * the `manage_media_custom_column` hook.
 	 */
 	public function image_optimizer_custom_column($column_name, $id) {
-		if( $column_name == 'cw-image-optimizer' ) {
+		if( $column_name == 'wp-image-optimizer' ) {
 			$data = wp_get_attachment_metadata($id);
 
 			if(!isset($data['file'])){
@@ -521,12 +522,12 @@ class Admin {
 	
 			if ( isset($data['image_optimizer']) && !empty($data['image_optimizer']) ) {
 				print $data['image_optimizer'];
-				printf("<br><a href=\"admin.php?action=image_optimizer_manual&amp;attachment_ID=%d\">%s</a>",
+				printf("<br><a href=\"admin.php?action=image_optimizer_manual&amp;attachment_ID=%d\" class=\"button-secondary\">%s</a>",
 						 $id,
 						 __('Re-optimize', $this->plugin_text_domain));
 			} else {
 				print __('Not processed', $this->plugin_text_domain);
-				printf("<br><a href=\"admin.php?action=image_optimizer_manual&amp;attachment_ID=%d\">%s</a>",
+				printf("<br><a href=\"admin.php?action=image_optimizer_manual&amp;attachment_ID=%d\" class=\"button-primary\">%s</a>",
 						 $id,
 						 __('Optimize now!', $this->plugin_text_domain));
 			}
