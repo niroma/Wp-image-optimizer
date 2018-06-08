@@ -100,6 +100,7 @@
 		deferred2.done(function() { console.log('done deferred2');});
 		
 		$.when( deferred, deferred2 ).done(function () {
+			$('#bulkOptimizeOutputProgressPercent').html("<p><b>Building optimization queue - Please wait</b></p>");
 			totalItems = allfiles.length;
 			allfiles = Array.from(new Set(allfiles));
 
