@@ -77,84 +77,91 @@
 		totalItemsToProcess = 0,
 		toProcess = 0,
 		errorCount = 0,
-		awaitingOpti, allfiles;
+		awaitingOpti,
+		optilist,
+		allfiles,
+		deferred,
+		deferred2;
+		
 	
 	function getList(ajxaction) {
 		$('#bulkOptimizeOutputProgressPercent').html("<p><b>Retrieving files list - Please wait</b></p>");
-			/*var call = $.ajax({
-				url: ajaxurl,
-				data: {action: ajxaction},
-				type: 'get',
-			});
 			
-			call.done(function(fileids) {
-				processList(fileids);
-			});*/
-			var fileids;
-			
+		deferred = $.Deferred();
+		deferred2 = $.Deferred();
+		allfiles = [];
+		optilist = [];
+		
+		get_full_list(0);
+		get_opti_list(0);
+		
+		
+		deferred.done(function() { console.log('done deferred');});
+		deferred2.done(function() { console.log('done deferred2');});
+		
+		$.when( deferred, deferred2 ).done(function () {
+			totalItems = allfiles.length;
+			allfiles = Array.from(new Set(allfiles));
+
+			optilist = Array.from(new Set(optilist));
+
+			awaitingOpti = $(allfiles).not(optilist).get();
+			totalNonOptiItems = awaitingOpti.length;
+
+			if (ajxaction == 'get_nonopti_files_list') processList(awaitingOpti);
+			if (ajxaction == 'get_all_files_list') processList(allfiles);
+		});
+		
+	}
+	
+	
+	function get_full_list(lastid) {
 			$.ajax({
 				url: ajaxurl,
-				data: {action: 'get_full_files_list'},
-				type: 'get'
-			}).done( function( data ) {
-				console.log(data);
-				if (data.all) allfiles = data.all;
-				if (data.nonopti) awaitingOpti = data.nonopti;
-				totalItems = allfiles.length;
-				totalNonOptiItems = awaitingOpti.length;
-				if (ajxaction == 'get_nonopti_files_list') fileids = awaitingOpti;
-				if (ajxaction == 'get_all_files_list') fileids = allfiles;
-				processList(fileids);
+				data: {action: 'get_full_list', lastid: lastid},
+				type: 'post'
+			}).success( function( data ) {
+				console.log('FULL LIST');
+				console.log( data);
+				var idlast = data['lastid'],
+					tmp = allfiles;
+				allfiles = tmp.concat(data['data']);
+				console.log( allfiles);
+				if (idlast == lastid) {
+					deferred.resolve();
+					return;
+				}
+				get_full_list(idlast);
 			});
-			/*
-			var j1 = $.ajax( {
-						url: ajaxurl,
-						data: {action: 'get_all_files_list'},
-						type: 'get'
-					}).done( function( data ) {
-						console.log("ALL FILES" + data.length);
-						console.log(data);
-						totalItems = data.length;
-						if (ajxaction == 'get_all_files_list') fileids = data;
-					});
-				/*$.ajax({ // First Request
+	}
+	
+	function get_opti_list(lastid) {
+			$.ajax({
 				url: ajaxurl,
-				data: {action: 'get_all_files_list'},
-				type: 'get',
-				success: function(data) {
-					totalItems = data.length;
-					if (ajxaction == 'get_all_files_list') fileids = data;
-				}      
-			}); */
-			/*
-			var j2 = $.ajax( {
-						url: ajaxurl,
-						data: {action: 'get_nonopti_files_list'},
-						type: 'get'
-					}).done( function( data ) {
-						console.log("NON OPTI FILES" + data.length);
-						console.log(data);
-						totalNonOptiItems = data.length;
-						awaitingOpti = data;
-						if (ajxaction == 'get_nonopti_files_list') fileids = data;
-					});
-					*/
-				 /*$.ajax({ //Seconds Request
-				url: ajaxurl,
-				data: {action: 'get_nonopti_files_list'},
-				type: 'get',
-				success: function(data) {
-					totalNonOptiItems = data.length;
-					awaitingOpti = data;
-					if (ajxaction == 'get_nonopti_files_list') fileids = data;
-				}  
-			}); */
-			/*
-			$.when(j1, j2).then(function() {
-				console.log(fileids);
-				processList(fileids);
-			});*/
-
+				data: {action: 'get_opti_list', lastid: lastid},
+				type: 'post'
+			}).success( function( data ) {
+				console.log('OPTI LIST');
+				console.log( data);
+				var idlast = data['lastid'],
+					tmp = optilist;
+				optilist = tmp.concat(data['data']);
+				console.log( optilist);
+				if (idlast == lastid) {
+					deferred2.resolve();
+					return;
+				}
+				get_opti_list(idlast);
+			});
+	}
+	
+	
+	function buildNonOptiList(optiList) {
+		var tmp = [];
+		for (var i = 0; i < totalItems; i++) {
+   			if(!jQuery.inArray(allfiles[i], optiList) !== -1) tmp.push[allfiles[i]];
+		}
+		return tmp;
 	}
 	
 	function processList(idslist) {
@@ -220,38 +227,7 @@
 			if ( optimizedPercent.toFixed(2) == 100.00) $('#wpio-nonopti-row').remove();
 		}
 	}
-	/*
-	function processFile(filename, itemcount){
-		var def = $.Deferred();
-		
-		
-		processing = $.ajax({
-			url: ajaxurl,
-			data: {action: 'image_optimizer_optimize_file', file: filename },
-			type: 'post',
-			success: function(data) {
-				console.log(data);
-				printProgress(itemcount);
-				def.resolve();
-			},
-			error: function(data) {
-				console.log(data);
-				printProgress(itemcount);
-				def.resolve();
-			}
-		});
-		processing.done(function(fileids) {
-			return def.promise();
-		});
-	}
 	
-	function printProgress(itemcount) {
-		$('#bulkOptimizeOutputNotice').html('Processing file '+ itemcount);
-		var percentProgress = (itemcount / toProcess * 100).toFixed(2);
-		$('#bulkOptimizeOutputProgressPercent').html(percentProgress + '%');
-		$('#bulkOptimizeOutputProgress > span').css('width', percentProgress + '%');	
-	}
-	*/
 	$('#bulkOptimizeAllFiles').on( "click", function() {
 		$('#bulkOptimizeButtons').remove();
 		$('#bulkOptimize').show();

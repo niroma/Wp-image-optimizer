@@ -15,7 +15,7 @@ Reduce image file sizes and improve website performance using Linux littleutils 
 ** New features compared to CW Image Optimizer?**
 
 1. New plugin structure with many code rewrites and performance improvments
-1. Bulk Optimization now uses ajax to optimize images and can handle huge amount of images (bulk optimization was performed successfully on a 15k+ media library)
+1. Bulk Optimization now uses ajax to optimize images and can handle huge amount of images (bulk optimization was performed successfully on a 200k+ media library - yes it took some time)
 1. Optimize function can now fix images meta if structure is not correct
 1. Bulk Optimization can now be performed on All images or only the ones that haven’t been optimized yet
 1. **Save even more disk space** with Lossy Jpeg Compression (Fallback to lossless compression if fails)
@@ -121,6 +121,7 @@ Yes, WP Image Optimizer will not work if littleutils isn't installed. This plugi
 
 = 1.1.0 =
 * Lossy Compression for jpeg files
+* Optimized ajax and php for bulk resize, now supports bulk optimization of 200k + medias at once
 
 = 1.0.1 =
 * Removed unnecessary frontend files

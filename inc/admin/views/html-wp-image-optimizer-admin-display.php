@@ -10,7 +10,6 @@
  *
  * @author    Niroma
  */
-
 ?>
 <div class="wrap"> 
 <?php /*
@@ -50,7 +49,7 @@
 	<h2><?php _e( 'WP Image Optimizer', $this->plugin_text_domain ); ?></h2>
     
 	<?php 
-        $total = $this->get_files_sum();
+        $total = $this->get_files_sum(false);
 		if ($total > 0) {
 			$optimized = $this->get_optimized_files_sum();
 			$nonoptimized = $total - $optimized;
@@ -61,6 +60,12 @@
 		$optimizedsize = $this->get_optimized_total_size();
 		$spacesaved = $totalsize - $optimizedsize;
 		if ($totalsize > 0) $averagesizereduction = round($spacesaved / $totalsize * 100,2);
+		
+/*		
+$a = $this->get_full_list();
+$b = $this->get_opti_list();
+$c = array_diff($a, $b);
+var_dump($c);*/
     ?>
     <div id="col-container">
     	<?php 	

@@ -149,13 +149,13 @@ class Admin {
 	public function get_files_sum() {
 		global $wpdb;
 		$res = $wpdb->get_var("select COUNT(*) FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment';");
-		return $res;
+		return (int) $res;
 	}
 
 	public function get_optimized_files_sum() {
 		global $wpdb;
 		$res = $wpdb->get_var("select COUNT(*) FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )  WHERE ({$wpdb->posts}.post_mime_type LIKE 'image%' AND  {$wpdb->posts}.post_type = 'attachment') AND ({$wpdb->postmeta}.meta_key = 'is_optimized' AND CAST({$wpdb->postmeta}.meta_value AS CHAR) IN ('1'));");
-		return $res;
+		return (int) $res;
 	}	
 	
 	public function get_optimized_total_size() {
@@ -170,40 +170,35 @@ class Admin {
 		return (int) $res;
 	}
 	
-	public function get_full_files_list() {
+	public function get_full_list() {
 		global $wpdb;
-		$countattachments = $this->get_files_sum();
-		$all = array();
-		$last_id = 0;
+		$last_id = $_POST['lastid'] ? $_POST['lastid'] : 0;
+		$dataset = array();
+		$start = time();
 		do {
-			set_time_limit(20);
 			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment' AND ID > %d LIMIT 500;", $last_id ));
 			foreach($attachments as $attachment) {
-				$all[] = $attachment->ID;
+				$dataset[] = $attachment->ID;
 				$last_id = $attachment->ID;
 			}
-		} while ( ! empty( $attachments ) );
+		} while ( ! empty( $attachments ) && time()-$start < 15 );
+		wp_send_json(array('data' => $dataset, 'lastid' => $last_id));
+	}
 		
-		$countoptimized = $this->get_optimized_files_sum();
-		$optimized = array();
-		$last_id = 0;
+	public function get_opti_list() {
+		global $wpdb;
+		$last_id = $_POST['lastid'] ? $_POST['lastid'] : 0;
+		$dataset = array();
 		do {
-			set_time_limit(20);
 			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1' AND ID > %d LIMIT 500;", $last_id ));
 			foreach($attachments as $attachment) {
-				$optimized[] = $attachment->ID;
+				$dataset[] = $attachment->ID;
 				$last_id = $attachment->ID;
 			}
-		} while ( ! empty( $attachments ) );
-
-		$nonoptimized = array();
-		foreach ($all as $one) if( !in_array( $one ,$optimized ) ) $nonoptimized[] = $one;
-		$dataset = array(
-			"all" => $all,
-			"nonopti" => $nonoptimized
-		);
-		wp_send_json($dataset);
+		} while ( ! empty( $attachments ) && time()-$start < 15 );
+		wp_send_json(array('data' => $dataset, 'lastid' => $last_id));
 	}
+
 	/// OPTIMIZE FUNCTIONS
 	
 	/**
