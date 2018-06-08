@@ -1,10 +1,10 @@
 === WP Image Optimizer ===
 Contributors: @zulugrid @nir0ma
 Donate link: https://www.niroma.net/
-Tags: image, images, attachments, attachment, optimization, compress, littleutils, opt-jpg, opt-gig, opt-png
+Tags: image, images, attachments, attachment, optimization, compress, littleutils, opt-jpg, opt-gig, opt-png, compression, lossy, lossless
 Requires at least: 3.0.1
 Tested up to: 4.9.6
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,16 +13,18 @@ Reduce image file sizes and improve website performance using Linux littleutils 
 == Description ==
 
 ** New features compared to CW Image Optimizer?**
-1. **New plugin structure with many code rewrites and performance improvments
-1. **Bulk Optimization now uses ajax to optimize images and can handle huge amount of images (bulk optimization was performed successfully on a 15k+ media library)
-1. **Optimize function can now includes fix images meta if structure is not correct
-1. **Bulk Optimization can now be performed on All images or only the ones that haven’t been optimized yet
+
+1. New plugin structure with many code rewrites and performance improvments
+1. Bulk Optimization now uses ajax to optimize images and can handle huge amount of images (bulk optimization was performed successfully on a 15k+ media library)
+1. Optimize function can now fix images meta if structure is not correct
+1. Bulk Optimization can now be performed on All images or only the ones that haven’t been optimized yet
+1. **Save even more disk space** with Lossy Jpeg Compression (Fallback to lossless compression if fails)
 
 The WP Image Optimizer is a WordPress plugin that will automatically and losslessly optimize your images as you upload them to your blog. It can also optimize the images that you have already uploaded in the past.
 
 Because WP Image Optimizer uses lossless optimization techniques, your image quality will be exactly the same before and after the optimization. The only thing that will change is your file size.
 
-The WP Image Optimizer plugin is based on the WP Smush.it plugin. Unlike the WP Smush.it plugin, your files won’t be uploaded to a third party when using WP Image Optimizer. Your files are optimized using the Linux [littleutils](http://sourceforge.net/projects/littleutils/) image optimization tools (available for free). You don’t need to worry about the Smush.it privacy policy or terms of service because your images never leave your server.
+The WP Image Optimizer plugin is based on the WP Smush.it plugin. Unlike the WP Smush.it plugin, your files won’t be uploaded to a third party when using WP Image Optimizer. Your files are optimized using the Linux [littleutils](http://sourceforge.net/projects/littleutils/) and [jpeg-recompress](https://github.com/danielgtaylor/jpeg-archive) image optimization tools (available for free). You don’t need to worry about the Smush.it privacy policy or terms of service because your images never leave your server.
 
 **Why use WP Image Optimizer?**
 
@@ -44,12 +46,46 @@ The WP Image Optimizer plugin is based on the WP Smush.it plugin. Unlike the WP 
 
 These instructions were tested with littleutils 1.0.27 and Ubuntu 16.04 LTS (64-bit).
 
-Please note : The following procedure also works with littleutils 1.0.37, but I recommand using version 1.0.27.
+Please note : I you install littleutils 1.0.37 without installing 1.0.27 before, images optimization process may encounter issues.
 
+1. sudo apt-get update
 1. Download littleutils 1.0.27 : sudo wget http://downloads.sourceforge.net/project/littleutils/littleutils-source/1.0.27/littleutils-1.0.27.tar.bz2
 1. Install dependencies : sudo apt-get install gifsicle pngcrush lzip libpng12-0 libpng12-dev libjpeg-progs p7zip-full
 1. Uncompress littleutils : sudo tar jxvf littleutils-1.0.27.tar.bz2 && cd littleutils-1.0.27
-1. Configure and install littleutils : sudo ./configure --prefix=/usr && make && make install && make install-extra
+1. Configure and install littleutils : sudo ./configure --prefix=/usr && sudo make && sudo make install && sudo make install-extra
+1. Then you can upgrade littleutiles to 1.0.37 : sudo wget http://downloads.sourceforge.net/project/littleutils/littleutils-source/1.0.37/littleutils-1.0.37.tar.bz2
+1. Uncompress littleutils : sudo tar jxvf littleutils-1.0.37.tar.bz2 && cd littleutils-1.0.37
+1. Configure and install littleutils : sudo ./configure --prefix=/usr && sudo make && sudo make install && sudo make install-extra
+
+= Installing jpeg-recompress: Ubuntu 16.04 LTS (64-bit) (Needed for lossy optimization) =
+
+Install mozjpeg dependencies first
+
+1. sudo apt-get update
+1. sudo apt-get install build-essential autoconf pkg-config nasm libtool git gettext libjpeg-dev -y
+
+Build [mozjpeg] (https://github.com/mozilla/mozjpeg), the latest tar.gz can be found [here] (https://github.com/mozilla/mozjpeg/releases) which you can replace below in the wget line.
+
+1. cd /tmp
+1. wget https://github.com/mozilla/mozjpeg/archive/v3.3.1.tar.gz -O mozjpeg.tar.gz
+1. tar -xf mozjpeg.tar.gz
+1. cd mozjpeg
+1. autoreconf -fiv
+1. ./configure --with-jpeg8 --prefix=/usr
+1. make
+1. sudo make install
+
+Install jpeg-recompress with these commands, make sure you have the bzip2 package.
+
+1. sudo apt-get install bzip2
+1. cd /tmp
+1. wget https://github.com/danielgtaylor/jpeg-archive/releases/download/2.1.1/jpeg-archive-2.1.1-linux.tar.bz2 -O jpeg-archive.tar.bz2
+1. tar -xf jpeg-archive.tar.bz2
+1. sudo cp jpeg-recompress /usr/bin/jpeg-recompress
+1. sudo chmod 755 /usr/bin/jpeg-recompress
+
+(re)Install jpegtran
+1. sudo apt-get install libjpeg-turbo-progs
 
 = Troubleshooting =
 
@@ -83,6 +119,9 @@ Yes, WP Image Optimizer will not work if littleutils isn't installed. This plugi
 
 == Changelog ==
 
+= 1.1.0 =
+* Lossy Compression for jpeg files
+
 = 1.0.1 =
 * Removed unnecessary frontend files
 * Readme updated
@@ -93,4 +132,5 @@ Yes, WP Image Optimizer will not work if littleutils isn't installed. This plugi
 == Contact and Credits ==
 
 Wp Image optimizer Plugin Icon by [Freepik] (http://www.freepik.com)
+Jpeg Recompress installation instructions by [WP Bullet] (https://guides.wp-bullet.com/batch-optimize-jpg-lossy-linux-command-line-with-jpeg-recompress/)
 Wp Image optimizer is based on the famous CW Image Optimizer by [Jacob Allred](http://www.jacoballred.com/).

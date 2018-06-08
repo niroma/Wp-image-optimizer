@@ -64,6 +64,7 @@ class Init {
 		$this->opt_png = NS\OPT_PNG;
 		$this->opt_gif = NS\OPT_GIF;
 		$this->opt_jpg = NS\OPT_JPG;
+		$this->opt_jpeg_recompress = NS\OPT_JPEG_RECOMPRESS;
 		$this->opt_valid_os = NS\OPT_VALID_OS;
 		$this->opt_exec_enable = NS\EXEC_ENABLE;
 		$this->opt_skip_check = NS\OPT_SKIP_CHECK;
@@ -119,6 +120,7 @@ class Init {
 			$this->opt_png = false;
 			$this->opt_gif = false;
 			$this->opt_jpg = false;
+			$this->opt_jpeg_recompress = false;
 		} else {
 	
 			// To skip binary checking, define CW_IMAGE_OPTIMIZER_SKIP_CHECK in your wp-config.php
@@ -128,6 +130,12 @@ class Init {
 				$this->opt_skip_check = $skip = false;
 			}
 		 
+			// Check if exec is disabled
+			$disabled = array_map('trim', explode(',', ini_get('disable_functions')));
+			if(in_array('exec', $disabled)){
+				$this->opt_exec_enable = false;
+			}
+			
 			//$missing = array();
 			if(!$skip && empty( trim(exec('which opt-png')) )){
 				$this->opt_png = false;
@@ -146,15 +154,17 @@ class Init {
 			} else {
 				$this->opt_gif = true;
 			}
-			// Check if exec is disabled
-			$disabled = array_map('trim', explode(',', ini_get('disable_functions')));
-			if(in_array('exec', $disabled)){
-				$this->opt_exec_enable = false;
+			
+			if(!$skip && empty( trim(exec('which jpeg-recompress')) )){
+				$this->opt_jpeg_recompress = false;
+			} else {
+				$this->opt_jpeg_recompress = true;
 			}
+			
 		
 		}   
 		
-		$plugin_admin = new Admin\Admin( $this->get_plugin_name(), $this->get_version(), $this->get_plugin_text_domain(), $this->opt_png, $this->opt_gif, $this->opt_jpg, $this->opt_valid_os, $this->opt_exec_enable, $this->opt_skip_check );
+		$plugin_admin = new Admin\Admin( $this->get_plugin_name(), $this->get_version(), $this->get_plugin_text_domain(), $this->opt_png, $this->opt_gif, $this->opt_jpg, $this->opt_jpeg_recompress, $this->opt_valid_os, $this->opt_exec_enable, $this->opt_skip_check );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );

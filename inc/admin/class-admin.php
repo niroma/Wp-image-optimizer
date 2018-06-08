@@ -48,6 +48,7 @@ class Admin {
 	private $opt_valid_os;
 	private $opt_exec_enable;
 	private $opt_skip_check;
+	private $opt_jpeg_recompress;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -57,7 +58,7 @@ class Admin {
 	 * @param       string $version            The version of this plugin.
 	 * @param       string $plugin_text_domain The text domain of this plugin.
 	 */
-	public function __construct( $plugin_name, $version, $plugin_text_domain, $opt_png, $opt_gif, $opt_jpg, $opt_valid_os, $opt_exec_enable, $opt_skip_check ) {
+	public function __construct( $plugin_name, $version, $plugin_text_domain, $opt_png, $opt_gif, $opt_jpg, $opt_jpeg_recompress, $opt_valid_os, $opt_exec_enable, $opt_skip_check ) {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
@@ -66,6 +67,7 @@ class Admin {
 		$this->opt_png = $opt_png;
 		$this->opt_gif = $opt_gif;
 		$this->opt_jpg = $opt_jpg;
+		$this->opt_jpeg_recompress = $opt_jpeg_recompress;
 		$this->opt_valid_os = $opt_valid_os;
 		$this->opt_exec_enable = $opt_exec_enable;
 		$this->opt_skip_check = $opt_skip_check;
@@ -149,47 +151,50 @@ class Admin {
 		$res = $wpdb->get_var("select COUNT(*) FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment';");
 		return $res;
 	}
-	
+
 	public function get_optimized_files_sum() {
 		global $wpdb;
 		$res = $wpdb->get_var("select COUNT(*) FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )  WHERE ({$wpdb->posts}.post_mime_type LIKE 'image%' AND  {$wpdb->posts}.post_type = 'attachment') AND ({$wpdb->postmeta}.meta_key = 'is_optimized' AND CAST({$wpdb->postmeta}.meta_value AS CHAR) IN ('1'));");
 		return $res;
+	}	
+	
+	public function get_optimized_total_size() {
+		global $wpdb;
+		$res = $wpdb->get_var("SELECT sum(meta_value) FROM {$wpdb->postmeta} WHERE meta_key = 'wpio_compressed_size'");
+		return (int) $res;
+	}
+	
+	public function get_original_total_size() {
+		global $wpdb;
+		$res = $wpdb->get_var("SELECT sum(meta_value) FROM {$wpdb->postmeta} WHERE meta_key = 'wpio_original_size'");
+		return (int) $res;
 	}
 	
 	public function get_full_files_list() {
 		global $wpdb;
-		
 		$countattachments = $this->get_files_sum();
 		$all = array();
-		if ($countattachments > 5000) {
-			$last_id = 0;
-			do {
-				$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment' AND ID > %d LIMIT 5000;", $last_id ));
-				foreach($attachments as $attachment) {
-					$all[] = $attachment->ID;
-					$last_id = $attachment->ID;
-				}
-			} while ( ! empty( $attachments ) );
-		} else {
-			$attachments = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment';" ); 
-			foreach($attachments as $attachment)  $all[] = $attachment->ID;
-		}
+		$last_id = 0;
+		do {
+			set_time_limit(20);
+			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment' AND ID > %d LIMIT 500;", $last_id ));
+			foreach($attachments as $attachment) {
+				$all[] = $attachment->ID;
+				$last_id = $attachment->ID;
+			}
+		} while ( ! empty( $attachments ) );
 		
 		$countoptimized = $this->get_optimized_files_sum();
 		$optimized = array();
-		if ($countoptimized > 5000) {
-			$last_id = 0;
-			do {
-				$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1' AND ID > %d LIMIT 5000;", $last_id ));
-				foreach($attachments as $attachment) {
-					$optimized[] = $attachment->ID;
-					$last_id = $attachment->ID;
-				}
-			} while ( ! empty( $attachments ) );
-		} else {
-			$attachments = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )  WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND  {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1';" ); 
-			foreach($attachments as $attachment)  $optimized[] = $attachment->ID;
-		}
+		$last_id = 0;
+		do {
+			set_time_limit(20);
+			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1' AND ID > %d LIMIT 500;", $last_id ));
+			foreach($attachments as $attachment) {
+				$optimized[] = $attachment->ID;
+				$last_id = $attachment->ID;
+			}
+		} while ( ! empty( $attachments ) );
 
 		$nonoptimized = array();
 		foreach ($all as $one) if( !in_array( $one ,$optimized ) ) $nonoptimized[] = $one;
@@ -234,7 +239,7 @@ class Admin {
 	 * @param   string $file            Full absolute path to the image file
 	 * @returns array
 	 */
-	public function image_optimizer($file) {
+	public function image_optimizer($file, $retry = NULL) {
 		// don't run on localhost, IPv4 and IPv6 checks
 		// if( in_array($_SERVER['SERVER_ADDR'], array('127.0.0.1', '::1')) )
 		//	return array($file, __('Not processed (local file)', $this->plugin_text_domain));
@@ -246,12 +251,13 @@ class Admin {
 		
 		$debug = '';
 		
+		//$original_file = $file;
 		$file_path = $file;
 	
 		// check that the file exists
 		if ( FALSE === file_exists($file_path) || FALSE === is_file($file_path) ) {
 			$msg = sprintf(__("Could not find <span class='code'>%s</span>", $this->plugin_text_domain), $file_path);
-			return array($file, $msg);
+			return array($file, $msg, NULL, NULL);
 		}
 		
 		chmod($file,0755);
@@ -259,7 +265,7 @@ class Admin {
 		// check that the file is writable
 		if ( FALSE === is_writable($file_path) ) {
 			$msg = sprintf(__("<span class='code'>%s</span> is not writable", $this->plugin_text_domain), $file_path);
-			return array($file, $msg);
+			return array($file, $msg, NULL, NULL);
 		}
 	
 		// check that the file is within the WP_CONTENT_DIR
@@ -268,7 +274,7 @@ class Admin {
 		$wp_upload_url = $upload_dir['baseurl'];
 		if ( 0 !== stripos(realpath($file_path), realpath($wp_upload_dir)) ) {
 			$msg = sprintf(__("<span class='code'>%s</span> must be within the content directory (<span class='code'>%s</span>)", $this->plugin_text_domain), htmlentities($file_path), $wp_upload_dir);
-			return array($file, $msg);
+			return array($file, $msg, NULL, NULL);
 		}
 		
 		if(function_exists('getimagesize')){
@@ -282,9 +288,20 @@ class Admin {
 			$type = 'Missing getimagesize() and mime_content_type() PHP functions';
 		}
 	
+		$command_addon = false;
+	
 		switch($type){
 			case 'image/jpeg':
 				$command = 'opt-jpg';
+				if( get_option($this->plugin_name .'_enable_lossy') == TRUE && $this->opt_jpeg_recompress && empty($retry) ) {
+					$command = 'jpeg-recompress --quality high --method smallfry --min 60';
+					/*
+					$file_path = pathinfo( $file );
+					$file_copy = trailingslashit( $file_path['dirname'] ) . $file_path['filename'] . '.bak.' . $file_path['extension'];
+					copy( $file, $file_copy );*/
+					//$command = 'jpeg-recompress';
+					$command_addon = true;
+				}
 				break;
 			case 'image/png':
 				$command = 'opt-png';
@@ -293,17 +310,24 @@ class Admin {
 				$command = 'opt-gif';
 				break;
 			default:
-				return array($file, __('Unknown type: ' . $type, $this->plugin_text_domain));
+				return array($file, __('Unknown type: ' . $type, $this->plugin_text_domain), NULL, NULL);
 		}
 	
-		if(get_option($this->plugin_name .'_preserve_exif_datas' == TRUE && $command == 'opt-jpg')) $command .= ' -m all';
+		if(get_option($this->plugin_name .'_preserve_exif_datas') == TRUE && $command == 'opt-jpg') $command .= ' -m all';
+		
+		$sizeBefore = filesize($file);
+		$exec_cmd = $command . ' ' . escapeshellarg($file);
+		if ($command_addon) $exec_cmd .= ' '. escapeshellarg($file) .' 2>&1';
 
-		$result = exec($command . ' ' . escapeshellarg($file));
-
+		$result = exec($exec_cmd);
+		clearstatcache();
+		$sizeAfter = filesize($file);
+		$output = $result;
 		$result = str_replace($file . ': ', '', $result);
 	
-		if ($result == 'unchanged') {
-			return array($file, __('No savings', $this->plugin_text_domain));
+		if ($result == 'unchanged' /*|| strpos($result, ' already processed ') !== false*/) {
+			//if ($command_addon) unlink($file_copy);
+			return array($file, __('No savings', $this->plugin_text_domain), $sizeBefore, $sizeAfter);
 		}
 	
 		if(strpos($result, ' vs. ') !== false) {
@@ -315,13 +339,42 @@ class Admin {
 	
 			$percent = 100 - (100 * ($s[1] / $s[0]));
 	
-			$results_msg = sprintf(__("Reduced by %01.1f%% (%s)", $this->plugin_text_domain), $percent, $savings_str);
+			$results_msg = sprintf(__("Reduced by %01.1f%% (%s) with littleutils", $this->plugin_text_domain), $percent, $savings_str);
 			
-	
-			return array($file, $results_msg);
+			//unlink($file_copy); // PROCESS SUCCESSFULL DELETE TMP COPY
+			return array($file, $results_msg, $sizeBefore, $sizeAfter);
 		}
 	
-		return array($file, __('Bad response from optimizer '. $debug, $this->plugin_text_domain));
+		if(strpos($result, 'New size is ') !== false) {
+			$s = explode(' vs. ', $result);
+			
+			$percent = '';
+			$savings_str = '';
+			
+			if (preg_match("/[0-9]?[0-9]%/", $result, $matches)) $percent = $matches[0];
+			if (preg_match("/[0-9]+\.[0-9]+%/", $result, $matches)) $percent = $matches[0];
+			if( preg_match( '!\(([^\)]+)\)!', $result, $matches )) $savings_str = $matches[1];
+			$savings_str = str_replace('saved ', '', $savings_str);
+			
+			$results_msg = sprintf(__("Reduced by %s (%s) with jpeg-recompress", $this->plugin_text_domain), $percent, $savings_str);
+			
+			// PROCESS SUCCESSFULL RENAME FILE TO REPLACE ORIGINAL
+			/*unlink($file);  // DELETE FAILED FILE
+			$file_path = pathinfo( $file_copy );
+			$new_name =  trailingslashit( $file_path['dirname'] ) . str_replace('.bak', '.', $file_path['filename']) . $file_path['extension'];
+			rename($file_copy, $new_name);*/
+			
+			if ( !empty($percent) && !empty($savings_str) ) return array($file, $results_msg, $sizeBefore, $sizeAfter);
+		}
+		
+		// JPEG RECOMPRESS FAILED
+		if ($command_addon) {
+			// DELETE COPY AND REPROCESS FILE WITH OPT-JPG
+			//unlink($file_copy);  // DELETE FAILED FILE
+			return $this->image_optimizer($file, $result);
+		}
+		
+		return array($file, __('Bad response from optimizer ', $this->plugin_text_domain) .' '. $output .' COMMAND :'. $exec_cmd .' || '. $retry, NULL, NULL);
 	}	
 	/**
 	 * Read the image paths from an attachment's meta data and process each image
@@ -346,12 +399,16 @@ class Admin {
 			$store_absolute_path = false;
 			$file_path =  $upload_path . $file_path;
 		}
-	
-		list($file, $msg) = $this->image_optimizer($file_path);
-	
+		
+
+		list($file, $msg, $before, $after) = $this->image_optimizer($file_path);
 		$meta['file'] = $file;
 		$meta['image_optimizer'] = $msg;
 	
+		$initialsize =  (int)$before;
+		$compressedsize = (int)$after;
+		/*$meta['wpio_compressed_size'] = $compressedtotalsize;*/
+		
 		// strip absolute path for Wordpress >= 2.6.2
 		if ( FALSE === $store_absolute_path ) {
 			$meta['file'] = str_replace($upload_path, '', $meta['file']);
@@ -365,12 +422,20 @@ class Admin {
 		$base_dir = dirname($file_path) . '/';
 	
 		foreach($meta['sizes'] as $size => $data) {
-			list($optimized_file, $results) = $this->image_optimizer($base_dir . $data['file']);
+			list($optimized_file, $results, $before, $after) = $this->image_optimizer($base_dir . $data['file']);
 			$meta['sizes'][$size]['file'] = str_replace($base_dir, '', $optimized_file);
 			$meta['sizes'][$size]['image_optimizer'] = $results;
+			$initialsize +=  (int)$before;
+			$compressedsize += (int)$after;
 		}
 		
-		if (!empty($ID)) $this->set_attachment_attributes( $ID, $meta );
+		/*
+		if(!isset($meta['wpio_original_total_size']) ){
+			$meta['wpio_original_total_size'] = $totalsize;
+		}
+		$meta['wpio_compressed_total_size'] = $compressedtotalsize;
+		*/
+		if (!empty($ID)) $this->set_attachment_attributes( $ID, $meta, $initialsize, $compressedsize );
 		if ($image_optimizer_meta != $meta['image_optimizer']) update_post_meta( $ID, 'image_optimizer', $meta['image_optimizer'] );
 		
 		return $meta;
@@ -390,12 +455,30 @@ class Admin {
 		
 		$is_optimized = get_post_meta( $post->ID, 'is_optimized', true );
 		$wp_optimize_stats = maybe_unserialize(get_post_meta( $post->ID, 'wp_optimize_stats', true ));
+		$sizeBefore = (int) get_post_meta( $post->ID, 'wpio_original_size', true );
+		$sizeAfter = (int) get_post_meta( $post->ID, 'wpio_compressed_size', true );
+		$reduction = $sizeBefore - $sizeAfter;
 		$wp_optimize_stats_html = '';
 		if ( !empty($wp_optimize_stats) && $wp_optimize_stats['sizes'] ) {
 			$wp_optimize_stats_html .= '<ul>';
+			$wp_optimize_stats_html .= '<li>';
+				$wp_optimize_stats_html .= 'Total size : before '. $sizeBefore .' ( '. $this->image_optimizer_format_bytes($sizeBefore) .')';
+			$wp_optimize_stats_html .= '<li>';
+			$wp_optimize_stats_html .= '<li>';
+				$wp_optimize_stats_html .= 'Total size : after '. $sizeAfter .' ( '. $this->image_optimizer_format_bytes($sizeAfter) .')';
+			$wp_optimize_stats_html .= '<li>';
+			$wp_optimize_stats_html .= '<li>';
+				$wp_optimize_stats_html .= 'Total reduction '. $reduction .' ( '. $this->image_optimizer_format_bytes($reduction) .') - '. round($reduction / $sizeBefore * 100,2) .' %';
+			$wp_optimize_stats_html .= '<li>';
+			
+			$wp_optimize_stats_html .= '<li>';
+				$wp_optimize_stats_html .=  __('Original ', $this->plugin_text_domain) . $wp_optimize_stats['width'] .'x'. $wp_optimize_stats['height'];
+				$wp_optimize_stats_html .= ' - ';
+				$wp_optimize_stats_html .= $wp_optimize_stats['image_optimizer'];
+			$wp_optimize_stats_html .= '</li>';
 			foreach($wp_optimize_stats['sizes'] as $size => $data) {
 				$wp_optimize_stats_html .= '<li>';
-					$wp_optimize_stats_html .=  $this->handleFilename(  $this->handleFilename( $wp_optimize_stats['sizes'][$size]['file'], '.'), '-', false);
+					$wp_optimize_stats_html .=  $wp_optimize_stats['sizes'][$size]['width'] .'x'. $wp_optimize_stats['sizes'][$size]['height'];
 					$wp_optimize_stats_html .= ' - ';
 					$wp_optimize_stats_html .= $wp_optimize_stats['sizes'][$size]['image_optimizer'];
 				$wp_optimize_stats_html .= '</li>';
@@ -426,7 +509,7 @@ class Admin {
 	/**
 	 * Set Optimized status
 	*/	
-	public function set_attachment_attributes( $attachment_id, $metas ) {
+	public function set_attachment_attributes( $attachment_id, $metas, $initialsize, $compressedsize ) {
 		$status = 1; //Files are supposed optimized
 		$valid = array('No savings', 'Reduced by');
 		foreach($metas['sizes'] as $size => $data) {
@@ -435,6 +518,8 @@ class Admin {
 				//echo "'$found' was found in '$results' at string position $pos. Image has been optimized if possible";
 			} else $status = 0;
 		}
+		if( empty( get_post_meta( $attachment_id, 'wpio_original_size', true ) ) ) update_post_meta( $attachment_id, 'wpio_original_size', $initialsize );
+		update_post_meta( $attachment_id, 'wpio_compressed_size', $compressedsize );
 		update_post_meta( $attachment_id, 'is_optimized', $status );
 		update_post_meta( $attachment_id, 'wp_optimize_stats', maybe_serialize($metas) );
 	}
@@ -568,6 +653,7 @@ class Admin {
 				$messageLog = '';
 				$skip_check = $_POST[$this->plugin_name.'_skip_check'];
 				$preserve_exif =  $_POST[$this->plugin_name.'_preserve_exif_datas']; 
+				$enable_lossy =  $_POST[$this->plugin_name.'_enable_lossy'];
 				
 				if (empty($admin_notice)) {
 					if ( get_option( $this->plugin_name.'_skip_check' ) !== false ) {
@@ -580,6 +666,12 @@ class Admin {
 						update_option( $this->plugin_name.'_preserve_exif_datas', $preserve_exif );
 					} else {
 						add_option( $this->plugin_name.'_preserve_exif_datas', $preserve_exif);
+					}
+					
+					if ( get_option( $this->plugin_name.'_enable_lossy' ) !== false ) {
+						update_option( $this->plugin_name.'_enable_lossy', $enable_lossy );
+					} else {
+						add_option( $this->plugin_name.'_enable_lossy', $enable_lossy);
 					}
 					
 					$admin_notice = "success";

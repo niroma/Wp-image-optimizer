@@ -13,7 +13,42 @@
 
 ?>
 <div class="wrap"> 
+<?php /*
+		global $wpdb;
+		$countattachments = $this->get_files_sum();
+		$all = array();
+		$last_id = 0;
+		do {
+			set_time_limit(20);
+			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment' AND ID > %d LIMIT 500;", $last_id ));
+			foreach($attachments as $attachment) {
+				$all[] = $attachment->ID;
+				$last_id = $attachment->ID;
+			}
+		} while ( ! empty( $attachments ) );
+		
+		$countoptimized = $this->get_optimized_files_sum();
+		$optimized = array();
+		$last_id = 0;
+		do {
+			set_time_limit(20);
+			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1' AND ID > %d LIMIT 500;", $last_id ));
+			foreach($attachments as $attachment) {
+				$optimized[] = $attachment->ID;
+				$last_id = $attachment->ID;
+			}
+		} while ( ! empty( $attachments ) );
+
+		$nonoptimized = array();
+		foreach ($all as $one) if( !in_array( $one ,$optimized ) ) $nonoptimized[] = $one;
+		$dataset = array(
+			"all" => $all,
+			"nonopti" => $nonoptimized
+		);
+		var_dump($dataset);*/
+?>
 	<h2><?php _e( 'WP Image Optimizer', $this->plugin_text_domain ); ?></h2>
+    
 	<?php 
         $total = $this->get_files_sum();
 		if ($total > 0) {
@@ -21,6 +56,11 @@
 			$nonoptimized = $total - $optimized;
 			$optimizedPercent = round($optimized / $total * 100,2);
 		}
+		
+		$totalsize = $this->get_original_total_size();
+		$optimizedsize = $this->get_optimized_total_size();
+		$spacesaved = $totalsize - $optimizedsize;
+		if ($totalsize > 0) $averagesizereduction = round($spacesaved / $totalsize * 100,2);
     ?>
     <div id="col-container">
     	<?php 	
@@ -83,6 +123,9 @@
                             </div>
                         </div>
                         <div class="clear"></div>
+                        	<?php if ($totalsize > 0) { ?>
+                        		<p><?php if ($totalsize > 0) echo $this->image_optimizer_format_bytes($spacesaved) . __( ' disk space saved', $this->plugin_text_domain ) .' '. $averagesizereduction .'% average file size reduction'; ?></p>
+                            <?php } ?>
                             <p><?php echo __( 'We found', $this->plugin_text_domain ) .' '. $total .' '.  __( 'images in your media library', $this->plugin_text_domain ); ?></p>
                             <p>
                             <?php  
@@ -126,6 +169,7 @@
                                     <li><?php echo $this->opt_png  ? '<span class="dashicons dashicons-yes"></span> OPT-PNG '. __( 'is installed', $this->plugin_text_domain ) : '<span class="dashicons dashicons-no"></span> OPT-PNG '. __( 'is missing', $this->plugin_text_domain ); ?></li>
                                     <li><?php echo $this->opt_jpg  ? '<span class="dashicons dashicons-yes"></span> OPT-JPG '. __( 'is installed', $this->plugin_text_domain ) : '<span class="dashicons dashicons-no"></span> OPT-JPG '. __( 'is missing', $this->plugin_text_domain ); ?></li>
                                 <?php }?>
+                                <li><?php echo $this->opt_jpeg_recompress  ? '<span class="dashicons dashicons-yes"></span> JPEG_RECOMPRESS '. __( 'is installed', $this->plugin_text_domain ) : '<span class="dashicons dashicons-no"></span> JPEG_RECOMPRESS '. __( 'is missing', $this->plugin_text_domain ); ?></li>
 								<li><?php echo $this->opt_exec_enable  ? '<span class="dashicons dashicons-yes"></span> Exec '. __( 'is enabled', $this->plugin_text_domain ) : '<span class="dashicons dashicons-no"></span> Exec '. __( 'is disabled', $this->plugin_text_domain ) ; ?></li>
 								<li><?php echo function_exists('getimagesize')  ? '<span class="dashicons dashicons-yes"></span> getimagesize '. __( 'found', $this->plugin_text_domain ) : '<span class="dashicons dashicons-no"></span> getimagesize '. __( 'is missing', $this->plugin_text_domain ); ?></li>
 								<li><?php echo function_exists('mime_content_type')  ? '<span class="dashicons dashicons-yes"></span> mime_content_type '. __( 'found', $this->plugin_text_domain ) : '<span class="dashicons dashicons-no"></span> mime_content_type '. __( 'is missing', $this->plugin_text_domain ); ?></li>
@@ -172,6 +216,22 @@
   						</div>
                         <p id="<?php echo $this->plugin_name; ?>_preserve_exif_datas-description" class="description">
 							<?php _e( 'Preserving exif datas will increase file size. Only available for jpg files', $this->plugin_text_domain ); ?>
+                        </p>	
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="<?php echo $this->plugin_name; ?>_enable_lossy" />
+							<?php _e( 'Enable Lossy Compression ?', $this->plugin_text_domain ); ?>
+                        </label>
+                    </th>
+                    <td>								
+                        <div class="slider-checkbox">
+                            <input type="checkbox" id="<?php echo $this->plugin_name; ?>_enable_lossy" name="<?php echo $this->plugin_name; ?>_enable_lossy" value="true"<?php if(get_option($this->plugin_name .'_enable_lossy') == TRUE) : ?> checked="true" <?php endif;?> />
+                            <span class="label"><?php _e( 'Lossy Compression', $this->plugin_text_domain ); ?></span>
+  						</div>
+                        <p id="<?php echo $this->plugin_name; ?>_preserve_exif_datas-description" class="description">
+							<?php _e( 'Lossy compression alter image quality but saves more space. If Lossy optimization fails, WP Image Optimiszer switches back to Lossless compression', $this->plugin_text_domain ); ?>
                         </p>	
                     </td>
                 </tr>

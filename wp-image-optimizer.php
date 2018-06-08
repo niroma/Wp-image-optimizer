@@ -39,7 +39,7 @@ define( __NAMESPACE__ . '\NS', __NAMESPACE__ . '\\' );
 
 define( NS . 'PLUGIN_NAME', 'wp-image-optimizer' );
 
-define( NS . 'PLUGIN_VERSION', '1.0.0' );
+define( NS . 'PLUGIN_VERSION', '1.1.0' );
 
 define( NS . 'PLUGIN_NAME_DIR', plugin_dir_path( __FILE__ ) );
 
@@ -54,6 +54,8 @@ define( NS . 'OPT_PNG', true);
 define( NS . 'OPT_GIF', true);
 
 define( NS . 'OPT_JPG', true);
+
+define( NS . 'OPT_JPEG_RECOMPRESS', true);
 
 define( NS . 'OPT_VALID_OS', true);
 
