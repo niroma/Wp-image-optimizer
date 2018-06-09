@@ -198,6 +198,16 @@ class Admin {
 		} while ( ! empty( $attachments ) && time()-$start < 15 );
 		wp_send_json(array('data' => $dataset, 'lastid' => $last_id));
 	}
+	
+	public function cron_image_optimizer() {
+		global $wpdb;
+		$attachments = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND {$wpdb->posts}.post_type = 'attachment' AND NOT EXISTS ( SELECT post_id FROM {$wpdb->postmeta} WHERE {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id ) LIMIT 250;");
+		//return $attachments;
+		foreach($attachments as $attachment) {
+			$meta = $this->image_optimizer_resize_from_meta_data( wp_get_attachment_metadata( $attachment->ID, true ), $attachment->ID );
+			wp_update_attachment_metadata( $attachment->ID, $meta );
+		}
+	}
 
 	/// OPTIMIZE FUNCTIONS
 	
@@ -649,6 +659,7 @@ class Admin {
 				$skip_check = $_POST[$this->plugin_name.'_skip_check'];
 				$preserve_exif =  $_POST[$this->plugin_name.'_preserve_exif_datas']; 
 				$enable_lossy =  $_POST[$this->plugin_name.'_enable_lossy'];
+				$enable_cron =  $_POST[$this->plugin_name.'_enable_cron'];
 				
 				if (empty($admin_notice)) {
 					if ( get_option( $this->plugin_name.'_skip_check' ) !== false ) {
@@ -667,6 +678,12 @@ class Admin {
 						update_option( $this->plugin_name.'_enable_lossy', $enable_lossy );
 					} else {
 						add_option( $this->plugin_name.'_enable_lossy', $enable_lossy);
+					}
+					
+					if ( get_option( $this->plugin_name.'_enable_cron' ) !== false ) {
+						update_option( $this->plugin_name.'_enable_cron', $enable_cron );
+					} else {
+						add_option( $this->plugin_name.'_enable_cron', $enable_cron);
 					}
 					
 					$admin_notice = "success";

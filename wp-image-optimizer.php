@@ -15,7 +15,7 @@
  * Plugin Name:       WP Image Optimizer
  * Plugin URI:        https://wordpress.org/plugins/wp-image-optimizer/
  * Description:       Reduce image file sizes and improve website performance using Linux littleutils image optimizers within WordPress.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Author:            Niroma
  * Author URI:        https://www.niroma.net/
  * License:           GPL-2.0+
@@ -39,7 +39,7 @@ define( __NAMESPACE__ . '\NS', __NAMESPACE__ . '\\' );
 
 define( NS . 'PLUGIN_NAME', 'wp-image-optimizer' );
 
-define( NS . 'PLUGIN_VERSION', '1.1.0' );
+define( NS . 'PLUGIN_VERSION', '1.1.1' );
 
 define( NS . 'PLUGIN_NAME_DIR', plugin_dir_path( __FILE__ ) );
 

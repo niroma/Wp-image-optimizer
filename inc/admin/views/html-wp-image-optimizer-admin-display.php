@@ -43,8 +43,8 @@
 		$dataset = array(
 			"all" => $all,
 			"nonopti" => $nonoptimized
-		);
-		var_dump($dataset);*/
+		);*/
+		//var_dump( $this->cron_image_optimizer());
 ?>
 	<h2><?php _e( 'WP Image Optimizer', $this->plugin_text_domain ); ?></h2>
     
@@ -237,6 +237,22 @@ var_dump($c);*/
   						</div>
                         <p id="<?php echo $this->plugin_name; ?>_preserve_exif_datas-description" class="description">
 							<?php _e( 'Lossy compression alter image quality but saves more space. If Lossy optimization fails, WP Image Optimiszer switches back to Lossless compression', $this->plugin_text_domain ); ?>
+                        </p>	
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">
+                        <label for="<?php echo $this->plugin_name; ?>_enable_lossy" />
+							<?php _e( 'Enable Cron ?', $this->plugin_text_domain ); ?>
+                        </label>
+                    </th>
+                    <td>								
+                        <div class="slider-checkbox">
+                            <input type="checkbox" id="<?php echo $this->plugin_name; ?>_enable_cron" name="<?php echo $this->plugin_name; ?>_enable_cron" value="true"<?php if(get_option($this->plugin_name .'_enable_cron') == TRUE) : ?> checked="true" <?php endif;?> />
+                            <span class="label"><?php _e( 'Enable cron task', $this->plugin_text_domain ); ?></span>
+  						</div>
+                        <p id="<?php echo $this->plugin_name; ?>_enable_cron-description" class="description">
+							<?php _e( 'A cron job will be set to resize unoptimized images', $this->plugin_text_domain ); ?>
                         </p>	
                     </td>
                 </tr>

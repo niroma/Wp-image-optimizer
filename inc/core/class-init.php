@@ -158,7 +158,7 @@ class Init {
 			if(!$skip && empty( trim(exec('which jpeg-recompress')) )){
 				$this->opt_jpeg_recompress = false;
 			} else {
-				$this->opt_jpeg_recompress = true;
+				$this->opt_jpeg_recompress = true;				
 			}
 			
 		
@@ -191,6 +191,12 @@ class Init {
 		
 		$this->loader->add_action( 'admin_post_optimizer_form_response', $plugin_admin, 'form_process');
 		$this->loader->add_action( 'admin_notices', $plugin_admin, 'print_plugin_admin_notices');
+		
+		if ( !wp_next_scheduled( 'wpio_optimize_images' ) && get_option( $this->plugin_name.'_enable_cron' ) == TRUE ) {
+			//wp_clear_scheduled_hook("cron_image_optimizer"); 
+			wp_schedule_event( time(), 'hourly', 'wpio_optimize_images' );
+		}
+		if (get_option( $this->plugin_name.'_enable_cron' ) == TRUE) $this->loader->add_action( 'wpio_optimize_images', $plugin_admin, 'cron_image_optimizer' );
 		
 		/*
 		 * Additional Hooks go here

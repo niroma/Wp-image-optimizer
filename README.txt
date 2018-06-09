@@ -4,7 +4,7 @@ Donate link: https://www.niroma.net/
 Tags: image, images, attachments, attachment, optimization, compress, littleutils, opt-jpg, opt-gig, opt-png, compression, lossy, lossless
 Requires at least: 3.0.1
 Tested up to: 4.9.6
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,7 +15,7 @@ Reduce image file sizes and improve website performance using Linux littleutils 
 ** New features compared to CW Image Optimizer?**
 
 1. New plugin structure with many code rewrites and performance improvments
-1. Bulk Optimization now uses ajax to optimize images and can handle huge amount of images (bulk optimization was performed successfully on a 200k+ media library - yes it took some time)
+1. Bulk Optimization now uses ajax to optimize images and can handle huge amount of images. Bulk optimization tests were performed successfully on a 200k+ media library ... yes it tooked a while to run the test, but it worked :) whereas all image optimization plugins I had been testing were failing on a 15k+ media library !
 1. Optimize function can now fix images meta if structure is not correct
 1. Bulk Optimization can now be performed on All images or only the ones that haven’t been optimized yet
 1. **Save even more disk space** with Lossy Jpeg Compression (Fallback to lossless compression if fails)
@@ -118,6 +118,9 @@ Yes, WP Image Optimizer will not work if littleutils isn't installed. This plugi
 2. Bulk optimization page. You can optimize all your images at once. This is very useful for existing blogs that have lots of images.
 
 == Changelog ==
+
+= 1.1.1 =
+* Added cron task option to resize 250 unoptimized images / hour
 
 = 1.1.0 =
 * Lossy Compression for jpeg files
