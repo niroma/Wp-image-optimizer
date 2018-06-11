@@ -146,9 +146,13 @@ class Admin {
 		wp_send_json($meta);
 	}
 	
-	public function get_files_sum($ajax = TRUE) {
-		global $wpdb;
-		$res = $wpdb->get_var("select COUNT(*) FROM $wpdb->posts WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment';");
+	public function get_files_sum($return = NULL) {
+		if ( false === ( $res = get_transient( 'get_files_sum' ) ) ) {
+			global $wpdb;
+			$res = $wpdb->get_var("select COUNT(*) FROM $wpdb->posts WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment'");
+			set_transient( 'get_files_sum', $res, 60); // Cache query for 1 min
+		}
+		if ($return) return (int) $res;
 		wp_send_json(array($res));
 	}
 

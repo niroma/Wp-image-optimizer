@@ -82,6 +82,13 @@
 				filesSum = data;
 				countOptiFiles();
 				getTotalSize();
+			} else {
+				$('#alien').removeClass('happy wow loading').addClass('cry');
+				$('#wpio_opti_row').html('Dammit ! No images found in your media library :(');
+				$('#bulkOptimizeButtons').remove();
+                $('#imagesOpti').removeClass('loading').html('N/A');
+                $('#savedSpace').removeClass('loading').html('N/A');
+                $('#avgReduction').removeClass('loading').html('N/A');
 			}
 			//$('#wpio_count_row').html( '<b>'+ filesSum +'</b> images found in your media library');
 			$('#imagesFound').removeClass('loading').html('<b>'+ filesSum +'</b>');

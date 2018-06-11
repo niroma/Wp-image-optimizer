@@ -16,7 +16,7 @@
 	<h2><?php _e( 'WP Image Optimizer', $this->plugin_text_domain ); ?></h2>
     
 	<?php   
-	$total = 10;// $this->get_files_sum(false);
+	$total = $this->get_files_sum(true);
 	?>
 	<div class="wpio-container">
         
