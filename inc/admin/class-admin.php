@@ -146,28 +146,32 @@ class Admin {
 		wp_send_json($meta);
 	}
 	
-	public function get_files_sum() {
+	public function get_files_sum($ajax = TRUE) {
 		global $wpdb;
-		$res = $wpdb->get_var("select COUNT(*) FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment';");
-		return (int) $res;
+		$res = $wpdb->get_var("select COUNT(*) FROM $wpdb->posts WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment';");
+		wp_send_json(array($res));
 	}
 
 	public function get_optimized_files_sum() {
 		global $wpdb;
-		$res = $wpdb->get_var("select COUNT(*) FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id )  WHERE ({$wpdb->posts}.post_mime_type LIKE 'image%' AND  {$wpdb->posts}.post_type = 'attachment') AND ({$wpdb->postmeta}.meta_key = 'is_optimized' AND CAST({$wpdb->postmeta}.meta_value AS CHAR) IN ('1'));");
-		return (int) $res;
+		$res = $wpdb->get_var("select COUNT(*) FROM $wpdb->postmeta WHERE meta_key = 'is_optimized'");
+		wp_send_json(array($res));
 	}	
 	
 	public function get_optimized_total_size() {
 		global $wpdb;
-		$res = $wpdb->get_var("SELECT sum(meta_value) FROM {$wpdb->postmeta} WHERE meta_key = 'wpio_compressed_size'");
-		return (int) $res;
+		$meta_key = 'wpio_compressed_size';
+		$res = $wpdb->get_var( $wpdb->prepare( "SELECT sum(meta_value) FROM $wpdb->postmeta WHERE meta_key = %s", $meta_key ) );
+		//return (int) $res;
+		wp_send_json(array($res));
 	}
 	
 	public function get_original_total_size() {
 		global $wpdb;
-		$res = $wpdb->get_var("SELECT sum(meta_value) FROM {$wpdb->postmeta} WHERE meta_key = 'wpio_original_size'");
-		return (int) $res;
+		$meta_key = 'wpio_original_size';
+		$res = $wpdb->get_var( $wpdb->prepare( "SELECT sum(meta_value) FROM $wpdb->postmeta WHERE meta_key = %s", $meta_key ) );
+		//return (int) $res;
+		wp_send_json(array($res));
 	}
 	
 	public function get_full_list() {
@@ -176,7 +180,7 @@ class Admin {
 		$dataset = array();
 		$start = time();
 		do {
-			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment' AND ID > %d LIMIT 500;", $last_id ));
+			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment' AND ID > %d LIMIT 750;", $last_id ));
 			foreach($attachments as $attachment) {
 				$dataset[] = $attachment->ID;
 				$last_id = $attachment->ID;
@@ -190,7 +194,7 @@ class Admin {
 		$last_id = $_POST['lastid'] ? $_POST['lastid'] : 0;
 		$dataset = array();
 		do {
-			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1' AND ID > %d LIMIT 500;", $last_id ));
+			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1' AND ID > %d LIMIT 750;", $last_id ));
 			foreach($attachments as $attachment) {
 				$dataset[] = $attachment->ID;
 				$last_id = $attachment->ID;

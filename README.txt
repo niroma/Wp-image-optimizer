@@ -4,7 +4,7 @@ Donate link: https://www.niroma.net/
 Tags: image, images, attachments, attachment, optimization, compress, littleutils, opt-jpg, opt-gig, opt-png, compression, lossy, lossless
 Requires at least: 3.0.1
 Tested up to: 4.9.6
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -118,6 +118,10 @@ Yes, WP Image Optimizer will not work if littleutils isn't installed. This plugi
 2. Bulk optimization page. You can optimize all your images at once. This is very useful for existing blogs that have lots of images.
 
 == Changelog ==
+
+= 1.1.2 =
+* UI improvments
+* Queries optimizations
 
 = 1.1.1 =
 * Added cron task option to resize 250 unoptimized images / hour

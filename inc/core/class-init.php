@@ -181,13 +181,15 @@ class Init {
 		//add_action('admin_init', 'image_optimizer_admin_init');
 		$this->loader->add_action('admin_action_image_optimizer_manual', $plugin_admin, 'image_optimizer_manual');
 		
-		$this->loader->add_action( 'wp_ajax_image_optimizer_optimize_file', $plugin_admin, 'image_optimizer_file_optimizer' );
-		$this->loader->add_action( 'wp_ajax_nopriv_image_optimizer_optimize_file', $plugin_admin, 'image_optimizer_file_optimizer' );
-		
+		// AJAX
 		$this->loader->add_action( 'wp_ajax_get_files_sum', $plugin_admin, 'get_files_sum' );
+		$this->loader->add_action( 'wp_ajax_get_optimized_files_sum', $plugin_admin, 'get_optimized_files_sum' );
+		$this->loader->add_action( 'wp_ajax_get_optimized_total_size', $plugin_admin, 'get_optimized_total_size' );
+		$this->loader->add_action( 'wp_ajax_get_original_total_size', $plugin_admin, 'get_original_total_size' );
 		$this->loader->add_action( 'wp_ajax_get_full_list', $plugin_admin, 'get_full_list' );
 		$this->loader->add_action( 'wp_ajax_get_opti_list', $plugin_admin, 'get_opti_list' );
-		//$this->loader->add_action( 'wp_ajax_nopriv_get_full_files_list', $plugin_admin, 'get_full_files_list' );
+		$this->loader->add_action( 'wp_ajax_image_optimizer_optimize_file', $plugin_admin, 'image_optimizer_file_optimizer' );
+		
 		
 		$this->loader->add_action( 'admin_post_optimizer_form_response', $plugin_admin, 'form_process');
 		$this->loader->add_action( 'admin_notices', $plugin_admin, 'print_plugin_admin_notices');
@@ -197,6 +199,7 @@ class Init {
 			wp_schedule_event( time(), 'hourly', 'wpio_optimize_images' );
 		}
 		if (get_option( $this->plugin_name.'_enable_cron' ) == TRUE) $this->loader->add_action( 'wpio_optimize_images', $plugin_admin, 'cron_image_optimizer' );
+
 		
 		/*
 		 * Additional Hooks go here
