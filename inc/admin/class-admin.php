@@ -153,6 +153,7 @@ class Admin {
 			$res = $wpdb->get_var("select COUNT(*) FROM $wpdb->posts WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment'");
 			set_transient( 'get_files_sum', $res, 60); // Cache query for 1 min
 		}
+		if (empty($res)) $res = 0;
 		if ($return) return (int) $res;
 		wp_send_json(array($res));
 	}
@@ -160,6 +161,7 @@ class Admin {
 	public function get_optimized_files_sum() {
 		global $wpdb;
 		$res = $wpdb->get_var("select COUNT(*) FROM $wpdb->postmeta WHERE meta_key = 'is_optimized'");
+		if (empty($res)) $res = 0;
 		wp_send_json(array($res));
 	}	
 	
@@ -167,6 +169,7 @@ class Admin {
 		global $wpdb;
 		$meta_key = 'wpio_compressed_size';
 		$res = $wpdb->get_var( $wpdb->prepare( "SELECT sum(meta_value) FROM $wpdb->postmeta WHERE meta_key = %s", $meta_key ) );
+		if (empty($res)) $res = 0;
 		//return (int) $res;
 		wp_send_json(array($res));
 	}
@@ -175,6 +178,7 @@ class Admin {
 		global $wpdb;
 		$meta_key = 'wpio_original_size';
 		$res = $wpdb->get_var( $wpdb->prepare( "SELECT sum(meta_value) FROM $wpdb->postmeta WHERE meta_key = %s", $meta_key ) );
+		if (empty($res)) $res = 0;
 		//return (int) $res;
 		wp_send_json(array($res));
 	}

@@ -119,6 +119,10 @@
 				
                 $('#imagesOpti').removeClass('loading').html('<b>'+ optiPercent.toFixed(2) +'%</b>');
 				
+			} else {
+				$('#imagesOpti').removeClass('loading').html('0');
+				$('#alien').removeClass('happy wow loading').addClass('cry');
+				$('#wpio_opti_row').html('Dammit ! No optimized images found in your media library :( You should click on the button below !');
 			}
 		});
 	}
@@ -132,6 +136,9 @@
 			if (data != 0) {
 				filesSize = data;
 				getOptiSize();
+			} else {
+                $('#savedSpace').removeClass('loading').html('N/A');
+                $('#avgReduction').removeClass('loading').html('N/A');
 			}
 		});
 	}
