@@ -304,7 +304,11 @@
 				$('#imagesOpti').removeClass('loading').html('<b>'+ optimizedPercent.toFixed(2) +'%</b>');
 				
 				$('#wpio_opti_row #wpio-nonopti').html(totalNonOptiItems);
-				if ( optimizedPercent.toFixed(2) == 100.00) if ( optiPercent.toFixed(2) == 100.00) $('#wpio_opti_row').html('<b>Congratulations ! All images are optimised :)</b>');
+				if ( optimizedPercent.toFixed(2) == 100.00) {
+					$('#alien').removeClass('wow cry loading').addClass('happy');
+					$('#wpio_opti_row').html('<b>Congratulations ! All images are optimised :)</b>');
+					$('#bulkOptimizeWarning').remove();
+				}
 			} else console.log(idFile + ' not awaiting opti ');
 		} else console.log('idFile is empty');
 	}
