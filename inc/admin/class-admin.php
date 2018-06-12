@@ -140,6 +140,7 @@ class Admin {
 	/// AJAX && CUSTOM QUERIES FUNCTIONS
 	public function image_optimizer_file_optimizer() {
 		$attachmentId = intval($_POST['file']);
+		$original_meta = wp_get_attachment_metadata( $attachmentId );
 		$meta = $this->image_optimizer_resize_from_meta_data($original_meta, $attachmentId);
 		wp_update_attachment_metadata( $attachmentId, $meta );	
 		$meta['id'] = $attachmentId;
@@ -530,7 +531,7 @@ class Admin {
 	public function set_attachment_attributes( $attachment_id, $metas, $initialsize, $compressedsize ) {
 		$status = 1; //Files are supposed optimized
 		$notProcessed = 'Bad response from optimizer';
-		if(stripos($meta['image_optimizer'], $notProcessed) !== false) $status = 0;
+		if(stripos($metas['image_optimizer'], $notProcessed) !== false) $status = 0;
 		foreach($metas['sizes'] as $size => $data) {
 			if(stripos($metas['sizes'][$size]['image_optimizer'], $notProcessed) !== false) $status = 0;
 		}
