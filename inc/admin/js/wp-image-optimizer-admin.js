@@ -77,7 +77,6 @@
 			data: {action: 'get_files_sum'},
 			type: 'get'
 		}).success( function( data ) {
-			console.log( data);
 			if (data != 0) {
 				filesSum = data;
 				countOptiFiles();
@@ -102,8 +101,6 @@
 			data: {action: 'get_optimized_files_sum'},
 			type: 'get'
 		}).success( function( data ) {
-			console.log('FULL LIST');
-			console.log( data);
 			if (data != 0) {
 				optiFilesSum = data;
 				nonOptiFilesSum = filesSum - optiFilesSum;
@@ -132,8 +129,6 @@
 			data: {action: 'get_original_total_size'},
 			type: 'get'
 		}).success( function( data ) {
-			console.log('FULL LIST');
-			console.log( data);
 			if (data != 0) {
 				filesSize = data;
 				getOptiSize();
@@ -147,8 +142,6 @@
 			data: {action: 'get_optimized_total_size'},
 			type: 'get'
 		}).success( function( data ) {
-			console.log('FULL LIST');
-			console.log( data);
 			if (data != 0) {
 				OptiFilesSize = data;
 				savedSpace = filesSize - OptiFilesSize;
@@ -179,14 +172,12 @@
 		
 		get_full_list(0);
 		get_opti_list(0);
-	
-		deferred.done(function() { console.log('done deferred');});
-		deferred2.done(function() { console.log('done deferred2');});
 		
 		$.when( deferred, deferred2 ).done(function () {
 			$('#bulkOptimizeOutputProgressPercent').html("Building optimization queue - Please wait");
-			totalItems = allfiles.length;
+			
 			allfiles = Array.from(new Set(allfiles));
+			totalItems = allfiles.length;
 
 			optilist = Array.from(new Set(optilist));
 
@@ -208,12 +199,9 @@
 				data: {action: 'get_full_list', lastid: lastid},
 				type: 'post'
 			}).success( function( data ) {
-				console.log('FULL LIST');
-				console.log( data);
 				var idlast = data['lastid'],
 					tmp = allfiles;
 				allfiles = tmp.concat(data['data']);
-				console.log( allfiles);
 				if (idlast == lastid) {
 					deferred.resolve();
 					return;
@@ -228,12 +216,9 @@
 				data: {action: 'get_opti_list', lastid: lastid},
 				type: 'post'
 			}).success( function( data ) {
-				console.log('OPTI LIST');
-				console.log( data);
 				var idlast = data['lastid'],
 					tmp = optilist;
 				optilist = tmp.concat(data['data']);
-				console.log( optilist);
 				if (idlast == lastid) {
 					deferred2.resolve();
 					return;
@@ -252,7 +237,6 @@
 	}
 
 	function optimizeFile() {
-		console.log('Optimizing single files now !');
 		if ( currentQueue ) {
 			//var idfile = currentQueue[0];
 			var idfile = currentQueue.shift();
@@ -260,11 +244,9 @@
 				url: ajaxurl,
 				data: {action: 'image_optimizer_optimize_file', file: idfile },
 				type: 'post'
-			}).done(function(oData) { 
-				console.log(oData); 
+			}).done(function(oData) {  
 				setCounter(oData);
 			}).fail(function(oData) { 
-				console.log(oData); 
 				errorCount++;
 				setCounter(null);
 			}).always(function () {
@@ -305,7 +287,6 @@
 	
 	function setCircleProgress(idFile) {
 		if (idFile) {
-			//console.log('set progress for '+ idFile);
 			var idx = $.inArray(idFile, awaitingOpti);
 			if (idx != -1) {
 				awaitingOpti.splice(idx, 1);
@@ -313,8 +294,6 @@
 				var totalOptiItems = totalItems - totalNonOptiItems,
 					optimizedPercent = totalOptiItems / totalItems * 100;
 				
-				//$('#percentCircle').attr('class', 'c100 p'+ optimizedPercent.toFixed() +' big');
-				//$('#percentCircleValue').html( optimizedPercent.toFixed(2) +'%');
 				$('#imagesOpti').removeClass('loading').html('<b>'+ optimizedPercent.toFixed(2) +'%</b>');
 				
 				$('#wpio_opti_row #wpio-nonopti').html(totalNonOptiItems);
@@ -334,6 +313,6 @@
 		getList('get_nonopti_files_list');
 	});
 	
-	countFiles();
+	if ( $('#wpio-wrapper').length ) countFiles();
 	
 })( jQuery );

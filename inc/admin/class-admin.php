@@ -139,10 +139,11 @@ class Admin {
 	
 	/// AJAX && CUSTOM QUERIES FUNCTIONS
 	public function image_optimizer_file_optimizer() {
-		$attachmentId = $_POST['file'];
-		$meta = $this->image_optimizer_resize_from_meta_data( wp_get_attachment_metadata( $attachmentId, true ), $attachmentId );
+		$attachmentId = intval($_POST['file']);
+		$meta = $this->image_optimizer_resize_from_meta_data($original_meta, $attachmentId);
 		wp_update_attachment_metadata( $attachmentId, $meta );	
 		$meta['id'] = $attachmentId;
+		$meta['is_optimized'] = get_post_meta( $attachmentId, 'is_optimized', true);
 		wp_send_json($meta);
 	}
 	
@@ -184,7 +185,7 @@ class Admin {
 		$dataset = array();
 		$start = time();
 		do {
-			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment' AND ID > %d LIMIT 750;", $last_id ));
+			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} WHERE post_mime_type LIKE 'image%' AND post_type = 'attachment' AND ID > %d ORDER BY ID ASC LIMIT 750;", $last_id ));
 			foreach($attachments as $attachment) {
 				$dataset[] = $attachment->ID;
 				$last_id = $attachment->ID;
@@ -198,7 +199,7 @@ class Admin {
 		$last_id = $_POST['lastid'] ? $_POST['lastid'] : 0;
 		$dataset = array();
 		do {
-			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1' AND ID > %d LIMIT 750;", $last_id ));
+			$attachments = $wpdb->get_results($wpdb->prepare("SELECT ID FROM {$wpdb->posts} INNER JOIN {$wpdb->postmeta} ON ({$wpdb->posts}.ID = {$wpdb->postmeta}.post_id) WHERE {$wpdb->posts}.post_mime_type LIKE 'image%' AND {$wpdb->posts}.post_type = 'attachment' AND {$wpdb->postmeta}.meta_key = 'is_optimized' AND {$wpdb->postmeta}.meta_value = '1' AND ID > %d ORDER BY ID ASC LIMIT 750;", $last_id ));
 			foreach($attachments as $attachment) {
 				$dataset[] = $attachment->ID;
 				$last_id = $attachment->ID;
@@ -448,8 +449,8 @@ class Admin {
 		}
 		$meta['wpio_compressed_total_size'] = $compressedtotalsize;
 		*/
-		if (!empty($ID)) $this->set_attachment_attributes( $ID, $meta, $initialsize, $compressedsize );
 		if ($image_optimizer_meta != $meta['image_optimizer']) update_post_meta( $ID, 'image_optimizer', $meta['image_optimizer'] );
+		if (!empty($ID)) $this->set_attachment_attributes( $ID, $meta, $initialsize, $compressedsize );
 		
 		return $meta;
 	}
@@ -524,40 +525,20 @@ class Admin {
 	*/	
 	public function set_attachment_attributes( $attachment_id, $metas, $initialsize, $compressedsize ) {
 		$status = 1; //Files are supposed optimized
-		$valid = array('No savings', 'Reduced by');
+		$notProcessed = 'Bad response from optimizer';
+		if(stripos($meta['image_optimizer'], $notProcessed) !== false) $status = 0;
 		foreach($metas['sizes'] as $size => $data) {
-			$results = $metas['sizes'][$size]['image_optimizer'];
-			if (($found = $this->findStringFromArray($valid, $results, $pos)) !== FALSE) {
-				//echo "'$found' was found in '$results' at string position $pos. Image has been optimized if possible";
-			} else $status = 0;
+			if(stripos($metas['sizes'][$size]['image_optimizer'], $notProcessed) !== false) $status = 0;
 		}
+		
 		if( empty( get_post_meta( $attachment_id, 'wpio_original_size', true ) ) ) update_post_meta( $attachment_id, 'wpio_original_size', $initialsize );
 		update_post_meta( $attachment_id, 'wpio_compressed_size', $compressedsize );
-		update_post_meta( $attachment_id, 'is_optimized', $status );
-		update_post_meta( $attachment_id, 'wp_optimize_stats', maybe_serialize($metas) );
+		if ($status != 0) {
+			update_post_meta( $attachment_id, 'is_optimized', $status );
+			update_post_meta( $attachment_id, 'wp_optimize_stats', maybe_serialize($metas) );
+		}
 	}
 	
-	
-	public function findStringFromArray($phrases, $string, &$position) {
-		// Reverse sort phrases according to length.
-		// This ensures that 'taxi' isn't found when 'taxi cab' exists in the string.
-		usort($phrases, create_function('$a,$b',
-										'$diff=strlen($b)-strlen($a);
-										 return $diff<0?-1:($diff>0?1:0);'));
-
-		// Pad-out the string and convert it to lower-case
-		$string = ' '.strtolower($string).' ';
-
-		// Find the phrase
-		foreach ($phrases as $key => $value) {
-			if (($position = strpos($string, ' '.strtolower($value).' ')) !== FALSE) {
-				return $phrases[$key];
-			}
-		}
-
-		// Not found
-		return FALSE;
-	}	
 	/**
 	 * Print column header for optimizer results in the media library using
 	 * the `manage_media_columns` hook.

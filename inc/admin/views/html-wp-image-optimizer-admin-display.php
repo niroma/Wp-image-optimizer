@@ -11,7 +11,7 @@
  * @author    Niroma
  */
 ?>
-<div class="wrap"> 
+<div id="wpio-wrapper" class="wrap"> 
 
 	<h2><?php _e( 'WP Image Optimizer', $this->plugin_text_domain ); ?></h2>
     
@@ -38,7 +38,7 @@
                             </div>
                         	<div id="bulkOptimizeFilesCol" class="col" style="display:none">
                                 <button id="bulkOptimizeFiles" type="button" class="button-primary">
-                                    <?php _e( 'Optimize ALL unoptimized files now', $this->plugin_text_domain  ); ?>
+                                    <?php _e( 'Optimize UNOPTIMIZED files now', $this->plugin_text_domain  ); ?>
                                 </button>
                             </div>
                         </div>
@@ -57,9 +57,9 @@
             </div>
             <div class="col">
             	<div class="panel">
-                	<h3 class="title"><?php _e( 'Love this plugin ?', $this->plugin_text_domain ); ?></h3>
+                	<h3 class="title"><?php _e( 'Love WP Image Optimizer ?', $this->plugin_text_domain ); ?></h3>
                     <div class="clear"></div>
-                    <a href="https://wordpress.org/plugins/wp-image-optimizer" target="_blank"><?php _e( 'Rate this plugin on or WordPress.org', $this->plugin_text_domain ); ?></a>
+                    <a href="https://wordpress.org/plugins/wp-image-optimizer" target="_blank"><?php _e( 'Give it 5 stars on WordPress.org !', $this->plugin_text_domain ); ?></a>
                 </div>
             	<div class="clear"></div>
             	<div class="flex-grid">

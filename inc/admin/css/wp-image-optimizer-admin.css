@@ -47,7 +47,7 @@
 .wpio-container .flex-grid .col.stat {text-transform:uppercase;color:#555;text-align:center}
 .wpio-container .flex-grid .col.stat div {color:#307bbb;display:block;font-size:32px;height: 40px;line-height:40px;margin:5px auto;}
 
-.wpio-container .flex-grid .col button {display:block;width:100%;font-weight:bold;text-align:center;font-size:14px;padding:10px;height:auto;}
+.wpio-container .flex-grid .col button {display:block;width:99%;font-weight:bold;text-align:center;font-size:14px;padding:10px;height:auto;margin:0 auto}
 
 @media (max-width: 1024px) {
 	
