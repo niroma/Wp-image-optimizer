@@ -74,7 +74,7 @@
                                 </div>
                                 <div class="col stat">
                                     <div id="imagesOpti" class="loading"><span class="bounceball"></span></div>
-                                    <?php _e( 'optimized image', $this->plugin_text_domain ); ?>
+                                    <?php _e( 'optimized images', $this->plugin_text_domain ); ?>
                                 </div>
                             </div>
                             <br />
