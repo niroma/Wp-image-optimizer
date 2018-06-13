@@ -11,10 +11,8 @@
  * @author    Niroma
  */
 ?>
-<div id="wpio-wrapper" class="wrap"> 
-
+<div class="wrap"> 
 	<h2><?php _e( 'WP Image Optimizer', $this->plugin_text_domain ); ?></h2>
-    
 	<?php   
 	$total = $this->get_files_sum(true);
 	?>
@@ -130,7 +128,7 @@
                     <table class="form-table">
                         <tr valign="top">
                             <th scope="row">
-                                <label for="<?php echo $this->plugin_name; ?>_skip_check" />
+                                <label for="<?php echo $this->plugin_name; ?>_skip_check">
                                     <?php _e( 'Skip littleutils check ?', $this->plugin_text_domain ); ?>
                                 </label>
                             </th>
@@ -147,7 +145,7 @@
                         </tr>
                         <tr valign="top">
                             <th scope="row">
-                                <label for="<?php echo $this->plugin_name; ?>_preserve_exif_datas" />
+                                <label for="<?php echo $this->plugin_name; ?>_preserve_exif_datas">
                                     <?php _e( 'Preserve EXIF datas ?', $this->plugin_text_domain ); ?>
                                 </label>
                             </th>
@@ -163,7 +161,7 @@
                         </tr>
                         <tr valign="top">
                             <th scope="row">
-                                <label for="<?php echo $this->plugin_name; ?>_enable_lossy" />
+                                <label for="<?php echo $this->plugin_name; ?>_enable_lossy">
                                     <?php _e( 'Enable Lossy Compression ?', $this->plugin_text_domain ); ?>
                                 </label>
                             </th>
@@ -179,7 +177,7 @@
                         </tr>
                         <tr valign="top">
                             <th scope="row">
-                                <label for="<?php echo $this->plugin_name; ?>_enable_lossy" />
+                                <label for="<?php echo $this->plugin_name; ?>_enable_lossy">
                                     <?php _e( 'Enable Cron ?', $this->plugin_text_domain ); ?>
                                 </label>
                             </th>
@@ -205,6 +203,5 @@
             </div>
 		</div>
 	</div>
-</div> 
-<?php //phpinfo(); ?>
+</div>
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->

@@ -4,7 +4,7 @@ Donate link: https://www.niroma.net/
 Tags: image, images, attachments, attachment, optimization, compress, littleutils, opt-jpg, opt-gig, opt-png, compression, lossy, lossless
 Requires at least: 3.0.1
 Tested up to: 4.9.6
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -119,6 +119,11 @@ Yes, WP Image Optimizer will not work if littleutils isn't installed. This plugi
 
 == Changelog ==
 
+= 1.1.4 =
+* Conditionnal script loading
+* Plugin is now translatable
+* Various fixes
+
 = 1.1.3 =
 * Bug fix
 
@@ -142,6 +147,6 @@ Yes, WP Image Optimizer will not work if littleutils isn't installed. This plugi
 
 == Contact and Credits ==
 
-Wp Image optimizer Plugin Icon by [Freepik] (http://www.freepik.com)
-Jpeg Recompress installation instructions by [WP Bullet] (https://guides.wp-bullet.com/batch-optimize-jpg-lossy-linux-command-line-with-jpeg-recompress/)
+Wp Image optimizer Plugin Icon by [Freepik](http://www.freepik.com)
+Jpeg Recompress installation instructions by [WP Bullet](https://guides.wp-bullet.com/batch-optimize-jpg-lossy-linux-command-line-with-jpeg-recompress/)
 Wp Image optimizer is based on the famous CW Image Optimizer by [Jacob Allred](http://www.jacoballred.com/).

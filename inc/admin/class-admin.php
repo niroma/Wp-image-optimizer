@@ -114,10 +114,26 @@ class Admin {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
-
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-image-optimizer-admin.js', array( 'jquery' ), $this->version, false );
-		wp_localize_script('wp-image-optimizer-ajax', 'ajaxurl', admin_url( 'admin-ajax.php' ));
-
+		if (isset($_GET['page']) && ($_GET['page'] == 'wp-image-optimizer')) {
+			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-image-optimizer-admin.js', array( 'jquery' ), $this->version, true );
+			$translation_array = array(
+				'noimages' => __( 'Dammit ! No images found in your media library :(', $this->plugin_text_domain ),
+				'nooptimizedimages' => __( 'Dammit ! No optimized images found in your media library :( You should click on the button below !', $this->plugin_text_domain ),
+				'awaitingopti' => __( 'files need an optimization', $this->plugin_text_domain ),
+				'congrats' => __( 'Congratulations ! All images are optimized :)', $this->plugin_text_domain ),
+				'retrieve' => __( 'Retrieving files list - Please wait', $this->plugin_text_domain ),
+				'buildingqueue' => __( 'Building optimization queue - Please wait', $this->plugin_text_domain ),
+				'filequeue' => __( 'files in queue - Please wait', $this->plugin_text_domain ),
+				'completed' => __( 'Optimization completed', $this->plugin_text_domain ),
+				'error' => __( 'An error occured while processing file', $this->plugin_text_domain ),
+				'of' => __( 'of', $this->plugin_text_domain ),
+				'file' => __( 'File', $this->plugin_text_domain ),
+				'success' => __( 'successfully optimized', $this->plugin_text_domain ),
+				'done' => __( 'Entire queue has been processed :)', $this->plugin_text_domain ),
+			);
+			wp_localize_script( $this->plugin_name, 'translation', $translation_array );	
+			wp_localize_script('wp-image-optimizer-ajax', 'ajaxurl', admin_url( 'admin-ajax.php' ));
+		}
 	}
 	public function display_plugin_setup_page() {
 		include_once( 'views/html-wp-image-optimizer-admin-display.php' );

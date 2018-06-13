@@ -50,26 +50,6 @@
 		deferred,
 		deferred2,
 		currentQueue;
-		
-		
-		/*
-		$this->loader->add_action( 'wp_ajax_get_files_sum', $plugin_admin, 'get_files_sum' );
-		$this->loader->add_action( 'wp_ajax_get_optimized_files_sum', $plugin_admin, 'get_optimized_files_sum' );
-		$this->loader->add_action( 'wp_ajax_get_optimized_total_size', $plugin_admin, 'get_optimized_total_size' );
-		$this->loader->add_action( 'wp_ajax_get_original_total_size', $plugin_admin, 'get_original_total_size' );
-		
-	    $total = $this->get_files_sum(false);
-		if ($total > 0) {
-			$optimized = $this->get_optimized_files_sum();
-			$nonoptimized = $total - $optimized;
-			$optimizedPercent = round($optimized / $total * 100,2);
-		}
-		
-		$totalsize = $this->get_original_total_size();
-		$optimizedsize = $this->get_optimized_total_size();
-		$spacesaved = $totalsize - $optimizedsize;
-		if ($totalsize > 0) $averagesizereduction = round($spacesaved / $totalsize * 100,2);	
-		*/
 	
 	function countFiles() {
 		$.ajax({
@@ -83,7 +63,7 @@
 				getTotalSize();
 			} else {
 				$('#alien').removeClass('happy wow loading').addClass('cry');
-				$('#wpio_opti_row').html('Dammit ! No images found in your media library :(');
+				$('#wpio_opti_row').html(translation.noimages);
 				$('#bulkOptimizeButtons').remove();
                 $('#imagesOpti').removeClass('loading').html('N/A');
                 $('#savedSpace').removeClass('loading').html('N/A');
@@ -106,11 +86,11 @@
 				nonOptiFilesSum = filesSum - optiFilesSum;
 				optiPercent = optiFilesSum / filesSum * 100;
 				
-				$('#wpio_opti_row').html('<span id="wpio-nonopti">'+ nonOptiFilesSum +'</span> files need an optimization');
+				$('#wpio_opti_row').html('<span id="wpio-nonopti">'+ nonOptiFilesSum +'</span> '+ translation.awaitingopti);
 				if ( optiPercent.toFixed(2) == 100.00) {
 					$('#bulkOptimizeFilesCol').remove();
 					$('#alien').removeClass('wow cry loading').addClass('happy');
-					$('#wpio_opti_row').html('Congratulations ! All images are optimized :)');
+					$('#wpio_opti_row').html(translation.congrats);
 				} else {
 					$('#bulkOptimizeFilesCol').show();
 					if ( optiPercent < 15 ) $('#alien').removeClass('happy wow loading').addClass('cry');
@@ -122,7 +102,7 @@
 			} else {
 				$('#imagesOpti').removeClass('loading').html('0');
 				$('#alien').removeClass('happy wow loading').addClass('cry');
-				$('#wpio_opti_row').html('Dammit ! No optimized images found in your media library :( You should click on the button below !');
+				$('#wpio_opti_row').html(translation.nooptimizedimages);
 			}
 		});
 	}
@@ -170,7 +150,7 @@
 	}
 	
 	function getList(ajxaction) {
-		$('#bulkOptimizeOutputProgressPercent').html("Retrieving files list - Please wait");
+		$('#bulkOptimizeOutputProgressPercent').html(translation.retrieve);
 			
 		deferred = $.Deferred();
 		deferred2 = $.Deferred();
@@ -181,7 +161,7 @@
 		get_opti_list(0);
 		
 		$.when( deferred, deferred2 ).done(function () {
-			$('#bulkOptimizeOutputProgressPercent').html("Building optimization queue - Please wait");
+			$('#bulkOptimizeOutputProgressPercent').html(translation.buildingqueue);
 			
 			allfiles = Array.from(new Set(allfiles));
 			totalItems = allfiles.length;
@@ -238,7 +218,7 @@
 		if (idslist) {
 			toProcess = totalItemsToProcess = idslist.length;
 			currentQueue = idslist.slice(0);
-			$('#bulkOptimizeOutputProgressPercent').html( totalItemsToProcess +" files in queue - Please wait");
+			$('#bulkOptimizeOutputProgressPercent').html( totalItemsToProcess + ' ' + translation.filequeue);
 			optimizeFile();
 		} else console.log('no data');
 	}
@@ -258,7 +238,7 @@
 				setCounter(null);
 			}).always(function () {
 				toProcess--;
-				setCircleProgress(idfile);
+				setProgress(idfile);
 				//currentQueue.shift();
 				if (currentQueue.length != 0) {
 					optimizeFile();	
@@ -269,30 +249,35 @@
 
 	function setCounter(datas) {
 		if (datas) {
-			var fileCount = totalItemsToProcess - toProcess;
+			var fileCount = totalItemsToProcess - toProcess + 1;
 			if (fileCount == toProcess) {
-				$('#bulkOptimizeOutputNotice').html('Optimization completed');
+				$('#bulkOptimizeOutputNotice').html(translation.completed);
 				$('#bulkOptimizeOutputProgressPercent').html('100%');
 				$('#bulkOptimizeOutputProgress > span').css('width', '100%');
 				$('#alien').removeClass('wow cry loading').addClass('happy');
 			} else {
-				var message = 'An error occured while processing file '+ fileCount +' of '+ totalItemsToProcess;
-				if (datas) message = 'File '+ fileCount +' of '+ totalItemsToProcess +' successfully optimized : '+ datas['image_optimizer'];
+				var message = translation.error +' '+ fileCount +' '+ translation.of +' '+ totalItemsToProcess;
+				if (datas) message = translation.file +' '+ fileCount +' '+ translation.of +' '+ totalItemsToProcess +' '+ translation.success +' : '+ datas['image_optimizer'];
 				$('#bulkOptimizeOutputNotice').html(message);
 				var percentProgress = (fileCount / totalItemsToProcess * 100).toFixed(2);
 				$('#bulkOptimizeOutputProgressPercent').html(percentProgress + '%');
 				$('#bulkOptimizeOutputProgress > span').css('width', percentProgress + '%');
 				if ( percentProgress == 100.00) {
 					$('#alien').removeClass('wow cry loading').addClass('happy');
-					$('#bulkOptimizeOutputProgressPercent').html('Optimization completed');
-					$('#wpio_opti_row').html('Congratulations ! All images are optimized :)');
+					$('#bulkOptimizeOutputProgressPercent').html(translation.completed);
+					$('#wpio_opti_row').html(translation.congrats);
 					$('#bulkOptimizeWarning').remove();
+					$('#bulkOptimizeOutputNotice').html(translation.done);
+					
+                	$('#savedSpace').addClass('loading').html('<span class="bounceball"></span>');
+               		$('#avgReduction').addClass('loading').html('<span class="bounceball"></span>');
+					getTotalSize();
 				}
 			}
 		}
 	}
 	
-	function setCircleProgress(idFile) {
+	function setProgress(idFile) {
 		if (idFile) {
 			var idx = $.inArray(idFile, awaitingOpti);
 			if (idx != -1) {
@@ -306,7 +291,7 @@
 				$('#wpio_opti_row #wpio-nonopti').html(totalNonOptiItems);
 				if ( optimizedPercent.toFixed(2) == 100.00) {
 					$('#alien').removeClass('wow cry loading').addClass('happy');
-					$('#wpio_opti_row').html('<b>Congratulations ! All images are optimised :)</b>');
+					$('#wpio_opti_row').html(translation.congrats);
 					$('#bulkOptimizeWarning').remove();
 				}
 			} else console.log(idFile + ' not awaiting opti ');
@@ -324,6 +309,6 @@
 		getList('get_nonopti_files_list');
 	});
 	
-	if ( $('#wpio-wrapper').length ) countFiles();
+	countFiles();
 	
 })( jQuery );
