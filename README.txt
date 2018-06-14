@@ -89,8 +89,9 @@ Install jpeg-recompress with these commands, make sure you have the bzip2 packag
 
 ##  Troubleshooting
 
-**littleutils is installed, but the plugin says it isn't.** If you are confident that it is installed properly, then go to the plugin configuration page and disable the installation check.
+**littleutils is installed, but the plugin says it isn\'t.** If you are confident that it is installed properly, then go to the plugin configuration page and disable the installation check.
 
+<<<<<<< HEAD
 It is also possible that your binaries aren't accessible to your web server user (especially while using a cron task or wp-cli to create posts). You can link these binaries using the following commands:
 
 ln -s /usr/local/bin/opt-jpg /usr/bin/opt-jpg
@@ -102,6 +103,18 @@ ln -s /usr/local/bin/gifsicle /usr/bin/gifsicle
 ln -s /usr/local/bin/pngcrush /usr/bin/pngcrush
 ln -s /usr/local/bin/pngrecolor /usr/bin/pngrecolor
 ln -s /usr/local/bin/pngstrip /usr/bin/pngstrip
+=======
+It is also possible that your binaries aren\'t accessible to your web server user (especially while using a cron task or wp-cli to create posts). You can link these binaries using the following commands:
+    ln -s /usr/local/bin/opt-jpg /usr/bin/opt-jpg
+    ln -s /usr/local/bin/opt-png /usr/bin/opt-png
+    ln -s /usr/local/bin/opt-gif /usr/bin/opt-gif
+    ln -s /usr/local/bin/tempname /usr/bin/tempname
+    ln -s /usr/local/bin/imagsize /usr/bin/imagsize
+    ln -s /usr/local/bin/gifsicle /usr/bin/gifsicle
+    ln -s /usr/local/bin/pngcrush /usr/bin/pngcrush
+    ln -s /usr/local/bin/pngrecolor /usr/bin/pngrecolor
+    ln -s /usr/local/bin/pngstrip /usr/bin/pngstrip
+>>>>>>> 5b486b2836ea630ada89e607a7f05679ae14911a
 
 == Frequently Asked Questions ==
 
@@ -114,9 +127,15 @@ No, WP Image Optimizer only supports Linux.
 Yes, WP Image Optimizer will not work if littleutils isn\'t installed. This plugin expects *opt-jpg*, *opt-png*, and *opt-gif* to be in the PATH.
 
 = Do I have to have jpeg-recompress? =
+<<<<<<< HEAD
 
 Jpeg-Recompress is not mandatory but lossy jpeg optimization won\'t work if it isn\'t installed
 
+=======
+
+Jpeg-Recompress is not mandatory but lossy jpeg optimization won\'t work if it isn\'t installed
+
+>>>>>>> 5b486b2836ea630ada89e607a7f05679ae14911a
 == Screenshots ==
 1. Additional optimize column added to media listing. You can see your savings, or manually optimize individual images.
 2. Bulk optimization page. You can optimize all your images at once. This is very useful for existing blogs that have lots of images.
