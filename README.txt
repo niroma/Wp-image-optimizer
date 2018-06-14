@@ -151,7 +151,8 @@ Jpeg-Recompress is not mandatory but lossy jpeg optimization won\'t work if it i
 
 == Contact and Credits ==
 
-Wp Image optimizer Plugin Icon by [Freepik](http://www.freepik.com)
-Aliens by [OpenClipart](https://openclipart.org)
-Jpeg Recompress installation instructions by [WP Bullet](https://guides.wp-bullet.com/batch-optimize-jpg-lossy-linux-command-line-with-jpeg-recompress/)
-Wp Image optimizer is based on the famous CW Image Optimizer by [Jacob Allred](http://www.jacoballred.com/).
+* Handcrafted with <3 by [Niroma](https://www.niroma.net)
+* Wp Image optimizer Plugin Icon by [Freepik](http://www.freepik.com)
+* Aliens by [OpenClipart](https://openclipart.org)
+* Jpeg Recompress installation instructions by [WP Bullet](https://guides.wp-bullet.com/batch-optimize-jpg-lossy-linux-command-line-with-jpeg-recompress/)
+* Wp Image optimizer is based on the famous CW Image Optimizer by [Jacob Allred](http://www.jacoballred.com/).
