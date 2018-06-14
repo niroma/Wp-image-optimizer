@@ -93,15 +93,25 @@ Install jpeg-recompress with these commands, make sure you have the bzip2 packag
 
 It is also possible that your binaries aren't accessible to your web server user (especially while using a cron task or wp-cli to create posts). You can link these binaries using the following commands:
 
+`
 ln -s /usr/local/bin/opt-jpg /usr/bin/opt-jpg
+
 ln -s /usr/local/bin/opt-png /usr/bin/opt-png
+
 ln -s /usr/local/bin/opt-gif /usr/bin/opt-gif
+
 ln -s /usr/local/bin/tempname /usr/bin/tempname
+
 ln -s /usr/local/bin/imagsize /usr/bin/imagsize
+
 ln -s /usr/local/bin/gifsicle /usr/bin/gifsicle
+
 ln -s /usr/local/bin/pngcrush /usr/bin/pngcrush
+
 ln -s /usr/local/bin/pngrecolor /usr/bin/pngrecolor
+
 ln -s /usr/local/bin/pngstrip /usr/bin/pngstrip
+`
 
 == Frequently Asked Questions ==
 
