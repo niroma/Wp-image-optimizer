@@ -1,9 +1,10 @@
 === WP Image Optimizer ===
-Contributors: @zulugrid @nir0ma
-Donate link: https://www.niroma.net/
+Contributors: zulugrid, nir0ma
 Tags: image, images, attachments, attachment, optimization, compress, littleutils, opt-jpg, opt-gig, opt-png, compression, lossy, lossless
+Donate link: https://www.niroma.net
 Requires at least: 3.0.1
 Tested up to: 4.9.6
+Requires PHP: 5.6.0
 Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -11,8 +12,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Reduce image file sizes and improve website performance using Linux littleutils image optimizers within WordPress.
 
 == Description ==
-
-** New features compared to CW Image Optimizer?**
+**New features compared to CW Image Optimizer?**
 
 1. New plugin structure with many code rewrites and performance improvments
 1. Bulk Optimization now uses ajax to optimize images and can handle huge amount of images. Bulk optimization tests were performed successfully on a 200k+ media library ... yes it tooked a while to run the test, but it worked :) whereas all image optimization plugins I had been testing were failing on a 15k+ media library !
@@ -35,14 +35,13 @@ The WP Image Optimizer plugin is based on the WP Smush.it plugin. Unlike the WP 
 1. **Robust** I needed a bulletproof plugin, able to handle thousands of files and working using cron-task with wp-cli. Most of the optimization plugins I had been testing failed, so I decided to build a new version of cw image otpimizer to suit my neeeds.
 
 == Installation ==
-
 1. Install littleutils on your Linux server (step-by-step instructions are below).
-1. Upload the 'wp-image-optimizer' plugin to your '/wp-content/plugins/' directory.
-1. Activate the plugin through the 'Plugins' menu in WordPress.
+1. Upload the \'wp-image-optimizer\' plugin to your \'/wp-content/plugins/\' directory.
+1. Activate the plugin through the \'Plugins\' menu in WordPress.
 1. Navigate to the settings page (Media >> WP Image Optimizer) to optimize your files
 1. Done!
 
-= Installing littleutils: Ubuntu 16.04 LTS (64-bit) =
+### Installing littleutils: Ubuntu 16.04 LTS (64-bit)
 
 These instructions were tested with littleutils 1.0.27 and Ubuntu 16.04 LTS (64-bit).
 
@@ -57,7 +56,7 @@ Please note : I you install littleutils 1.0.37 without installing 1.0.27 before,
 1. Uncompress littleutils : sudo tar jxvf littleutils-1.0.37.tar.bz2 && cd littleutils-1.0.37
 1. Configure and install littleutils : sudo ./configure --prefix=/usr && sudo make && sudo make install && sudo make install-extra
 
-= Installing jpeg-recompress: Ubuntu 16.04 LTS (64-bit) (Needed for lossy optimization) =
+### Installing jpeg-recompress: Ubuntu 16.04 LTS (64-bit) (Needed for lossy optimization)
 
 Install mozjpeg dependencies first
 
@@ -87,11 +86,11 @@ Install jpeg-recompress with these commands, make sure you have the bzip2 packag
 (re)Install jpegtran
 1. sudo apt-get install libjpeg-turbo-progs
 
-= Troubleshooting =
+##  Troubleshooting
 
-**littleutils is installed, but the plugin says it isn't.** If you are confident that it is installed properly, then go to the plugin configuration page and disable the installation check.
+**littleutils is installed, but the plugin says it isn\'t.** If you are confident that it is installed properly, then go to the plugin configuration page and disable the installation check.
 
-It is also possible that your binaries aren't accessible to your web server user (especially while using a cron task or wp-cli to create posts). You can link these binaries using the following commands:
+It is also possible that your binaries aren\'t accessible to your web server user (especially while using a cron task or wp-cli to create posts). You can link these binaries using the following commands:
     ln -s /usr/local/bin/opt-jpg /usr/bin/opt-jpg
     ln -s /usr/local/bin/opt-png /usr/bin/opt-png
     ln -s /usr/local/bin/opt-gif /usr/bin/opt-gif
@@ -110,10 +109,13 @@ No, WP Image Optimizer only supports Linux.
 
 = Do I have to have littleutils? =
 
-Yes, WP Image Optimizer will not work if littleutils isn't installed. This plugin expects *opt-jpg*, *opt-png*, and *opt-gif* to be in the PATH.
+Yes, WP Image Optimizer will not work if littleutils isn\'t installed. This plugin expects *opt-jpg*, *opt-png*, and *opt-gif* to be in the PATH.
+
+= Do I have to have jpeg-recompress? =
+
+Jpeg-Recompress is not mandatory but lossy jpeg optimization won\'t work if it isn\'t installed
 
 == Screenshots ==
-
 1. Additional optimize column added to media listing. You can see your savings, or manually optimize individual images.
 2. Bulk optimization page. You can optimize all your images at once. This is very useful for existing blogs that have lots of images.
 
