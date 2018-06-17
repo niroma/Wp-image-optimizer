@@ -133,6 +133,9 @@ Jpeg-Recompress is not mandatory but lossy jpeg optimization won\'t work if it i
 
 == Changelog ==
 
+= 1.1.5 =
+* Delete cron job when disabled
+
 = 1.1.4 =
 * Conditionnal script loading
 * Plugin is now translatable

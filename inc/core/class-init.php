@@ -195,8 +195,9 @@ class Init {
 		$this->loader->add_action( 'admin_notices', $plugin_admin, 'print_plugin_admin_notices');
 		
 		if ( !wp_next_scheduled( 'wpio_optimize_images' ) && get_option( $this->plugin_name.'_enable_cron' ) == TRUE ) {
-			//wp_clear_scheduled_hook("cron_image_optimizer"); 
 			wp_schedule_event( time(), 'hourly', 'wpio_optimize_images' );
+		} else if ( wp_next_scheduled( 'wpio_optimize_images' ) && get_option( $this->plugin_name.'_enable_cron' ) != TRUE ) {
+			wp_clear_scheduled_hook("cron_image_optimizer");
 		}
 		if (get_option( $this->plugin_name.'_enable_cron' ) == TRUE) $this->loader->add_action( 'wpio_optimize_images', $plugin_admin, 'cron_image_optimizer' );
 
